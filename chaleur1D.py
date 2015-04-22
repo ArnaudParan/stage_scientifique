@@ -14,5 +14,8 @@ A=I(nx)+nu*B(nx)
 #nombre d'itérations
 N=10
 for n in range(1,N):
-	U.append(linalg.solve(A,U[n-1]))
+	Un=linalg.solve(A,U[n-1])
+	Un+=Ubord
+	U.append(Un)
+
 
