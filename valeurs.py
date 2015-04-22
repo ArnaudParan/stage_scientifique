@@ -18,9 +18,14 @@ D=0.1
 #définition du maillage
 lx=10
 dx=0.1
+tmax=10
 dt=0.1
 
+#nombre d'affichages
+naff=5
+
 nx=int(lx/dx)
+nt=int(tmax/dt)
 
 #condition initiale intérieure
 U0=np.array([0.]*nx)

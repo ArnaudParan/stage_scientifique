@@ -12,20 +12,14 @@ U=[U0]
 #la matrice du schéma à inverser
 A=I(nx)+nu*B(nx)
 
-#nombre d'itérations
-tmax=10
-N=int(tmax/dt)
-print(N)
 #on implémente le schéma d'euler
-for n in range(1,N):
+for n in range(1,nt):
 	Un=linalg.solve(A,U[n-1])
 	Un+=Ubord
 	U.append(Un)
 
 #on trace la solution
 x=range(0,nx)
-#nombre d'affichages
-Naff=5
-for n in range(0,Naff-1):
-	plt.plot(x,U[n*N/Naff][x])
+for n in range(0,naff-1):
+	plt.plot(x,U[n*nt/naff][x])
 	plt.show()
