@@ -13,34 +13,31 @@ def I(n):
 	return np.identity(n)
 
 #coeff diffusion
-D=0.1
+D=1E-2
 
-#définition du maillage
+#définition du maillage et du temps
 lx=10
 dx=0.1
-tmax=10
+tmax=100
 dt=0.1
 
 #nombre d'affichages
 naff=5
 
+#grandeurs relatives à l'équation
+nu=D*dt/(dx*dx)
 nx=int(lx/dx)
 nt=int(tmax/dt)
 
 #condition initiale intérieure
 U0=np.array([0.]*nx)
-U0[nx/4]=10.
-U0[3*nx/4]=10.
+#U0[nx/4]=10.
+#U0[3*nx/4]=10.
 
-#conditions de bord ici, on fixe u à 0. sur le bord
+#conditions de bord
 Ubord=np.array([0.]*nx)
-Ubord[0]=0.
-Ubord[nx-1]=0.
+Ubord[0]=10.
+Ubord[nx-1]=10.
 
 
 U0+=Ubord
-
-
-
-#grandeurs relatives à l'équation
-nu=D*dt/(dx*dx)
