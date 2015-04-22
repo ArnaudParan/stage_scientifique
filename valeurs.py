@@ -13,16 +13,19 @@ def I(n):
 	return np.identity(n)
 
 #coeff diffusion
-D=10.
+D=0.1
 
 #définition du maillage
-nx=10
+lx=10
 dx=0.1
 dt=0.1
 
+nx=int(lx/dx)
+
 #condition initiale intérieure
 U0=np.array([0.]*nx)
-U0[nx/2]=10.
+U0[nx/4]=10.
+U0[3*nx/4]=10.
 
 #conditions de bord ici, on fixe u à 0. sur le bord
 Ubord=np.array([0.]*nx)
