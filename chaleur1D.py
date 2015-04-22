@@ -55,7 +55,7 @@ def tracer(U,lx,tmax,dx,dt,naff):
 	nx=1+int(lx/dx)
 	nt=1+int(tmax/dt)
 	x=range(0,nx)
-	"""for n in range(0,naff-1):
+	"""for n in range(0,naff):
 		plt.plot(mult(x,dx),U[n*nt/naff][x])
 		plt.ylabel('T')
 		plt.xlabel('x, t='+str(dt*n*nt/naff)+', D='+str(D))
