@@ -22,11 +22,12 @@ dt=0.1
 
 #condition initiale intérieure
 U0=np.array([0.]*nx)
+U0[nx/2]=10.
 
-#conditions de bord ici, on fixe u à 10 sur le bord
+#conditions de bord ici, on fixe u à 0. sur le bord
 Ubord=np.array([0.]*nx)
-Ubord[0]=10.
-Ubord[nx-1]=10.
+Ubord[0]=0.
+Ubord[nx-1]=0.
 
 
 U0+=Ubord
