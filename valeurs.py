@@ -18,11 +18,11 @@ D=1E1
 #définition du maillage et du temps
 lx=10.
 tmax=0.3
-dx=lx/100.
-dt=tmax/100.
 
 #nombre d'affichages
 naff=5
+
+
 
 #condition initiale intérieure
 def u0(x):
@@ -33,9 +33,6 @@ def u0(x):
 		return 10.
 	else:
 		return 0.
-"""U0=np.array([0.]*nx)
-U0[nx/4]=10.
-U0[3*nx/4]=10."""
 
 #conditions de bord
 def ubord(x):
@@ -45,9 +42,7 @@ def ubord(x):
 		return 10.
 	else:
 		return 0.
-"""Ubord=np.array([0.]*nx)
-Ubord[0]=10.
-Ubord[nx-1]=10.
 
 
-U0+=Ubord"""
+dx=lx/100.
+dt=tmax/100.
