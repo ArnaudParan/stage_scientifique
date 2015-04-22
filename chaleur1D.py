@@ -17,6 +17,23 @@ def mult(liste, scalaire):
 	return retour
 
 
+#grandeurs relatives à l'équation
+nu=D*dt/(dx*dx)
+nx=1+int(lx/dx)
+nt=1+int(tmax/dt)
+
+#condition initiale intérieure
+U0=np.array([0.]*nx)
+for i in range(0,nx-1):
+	U0[i]=u0(i*dx)
+
+#condition de bord
+Ubord=np.array([0.]*nx)
+Ubord[0]=ubord(0.)
+Ubord[nx-1]=ubord(lx)
+
+U0+=Ubord
+
 #définition de la solution
 U=[U0]
 
@@ -57,5 +74,4 @@ subplot(2,2,4)
 plt.plot(x,U[nt-1][x])
 plt.xlabel('t='+str(nt*dt))
 
-# savefig('../figures/subplot-grid.png', dpi=64)
 show()

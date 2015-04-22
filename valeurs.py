@@ -16,28 +16,38 @@ def I(n):
 D=1E1
 
 #définition du maillage et du temps
-lx=10
-dx=0.1
+lx=10.
 tmax=0.3
-dt=0.01
+dx=lx/100.
+dt=tmax/100.
 
 #nombre d'affichages
 naff=5
 
-#grandeurs relatives à l'équation
-nu=D*dt/(dx*dx)
-nx=int(lx/dx)
-nt=int(tmax/dt)
-
 #condition initiale intérieure
-U0=np.array([0.]*nx)
+def u0(x):
+	epsilon=lx/20.
+	if(x<=lx/4.+epsilon and x>=lx/4.-epsilon):
+		return 10.
+	elif(x<=3.*lx/4.+epsilon and x>=3.*lx/4.-epsilon):
+		return 10.
+	else:
+		return 0.
+"""U0=np.array([0.]*nx)
 U0[nx/4]=10.
-U0[3*nx/4]=10.
+U0[3*nx/4]=10."""
 
 #conditions de bord
-Ubord=np.array([0.]*nx)
+def ubord(x):
+	if(x==0.):
+		return 10.
+	elif(x==lx):
+		return 10.
+	else:
+		return 0.
+"""Ubord=np.array([0.]*nx)
 Ubord[0]=10.
 Ubord[nx-1]=10.
 
 
-U0+=Ubord
+U0+=Ubord"""
