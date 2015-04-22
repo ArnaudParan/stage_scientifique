@@ -13,13 +13,13 @@ def I(n):
 	return np.identity(n)
 
 #coeff diffusion
-D=1E-2
+D=1E1
 
 #définition du maillage et du temps
 lx=10
 dx=0.1
-tmax=100
-dt=0.1
+tmax=0.3
+dt=0.01
 
 #nombre d'affichages
 naff=5
@@ -31,8 +31,8 @@ nt=int(tmax/dt)
 
 #condition initiale intérieure
 U0=np.array([0.]*nx)
-#U0[nx/4]=10.
-#U0[3*nx/4]=10.
+U0[nx/4]=10.
+U0[3*nx/4]=10.
 
 #conditions de bord
 Ubord=np.array([0.]*nx)
