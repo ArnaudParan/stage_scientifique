@@ -1,5 +1,6 @@
 \documentclass[a4paper,10pt]{article}
 \usepackage[utf8]{inputenc}
+\usepackage{amsmath}
 
 %opening
 \title{}
@@ -7,13 +8,29 @@
 
 \begin{document}
 
-\maketitle
+  \maketitle
 
-\begin{abstract}
+  \begin{abstract}
 
-\end{abstract}
+  \end{abstract}
 
-\section{}
-technique à utiliser gradient conjugué
+  \section{Mémo}
+  technique à utiliser gradient conjugué
 
+  \section{Étude de l'équation simplifiée}
+      
+  \subsection{Équation d'Exner}
+  Voici l'équation d'Exner, avec un terme $\underline{q}$ à expliciter
+  \begin{equation}\label{eq}
+    \phi\frac{\partial z}{\partial t}+div\underline{q}=0
+  \end{equation}
+  On prend un terme $\underline{q}$ de la forme
+  \begin{equation}
+    \underline{q}=\underline{u}(|\underline{u}|^{\frac{1}{2}}-|\underline{u}_c|^{\frac{1}{2}})(1-\beta_*\frac{\partial z}{\partial s})
+  \end{equation}
+  Or, on a 
+  \[\partial_sz=\frac{\underline{u}}{|\underline{u}|}.\underline\nabla z\]
+  On doit donc résoudre
+  \[\phi\frac{\partial z}{\partial t}+div(\underline{u}(|\underline{u}|^{\frac{1}{2}}-|\underline{u}_c|^{\frac{1}{2}})(1-\beta_*\frac{\underline{u}}{|\underline{u}|}.\underline\nabla z))=0\]
+  
 \end{document}
