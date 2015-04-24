@@ -1,6 +1,7 @@
 \documentclass[a4paper,10pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
+\usepackage{mathtools}
 
 %opening
 \title{}
@@ -32,5 +33,20 @@
   \[\partial_sz=\frac{\underline{u}}{|\underline{u}|}.\underline\nabla z\]
   On doit donc résoudre
   \[\phi\frac{\partial z}{\partial t}+div(\underline{u}(|\underline{u}|^{\frac{1}{2}}-|\underline{u}_c|^{\frac{1}{2}})(1-\beta_*\frac{\underline{u}}{|\underline{u}|}.\underline\nabla z))=0\]
-  
+  En linéarisant, et en utilisant la formule de la divergence
+  \[\phi\frac{\partial z}{\partial t}+div(\underline{u})(1-\beta_*\psi)-\beta_*\underline{u}.\underline{\nabla}\psi=0\]
+  On passe au gradient pour obtenir
+  \[\left\{\begin{array}{l}
+      \phi\frac{\partial \psi}{\partial t}-\beta_*\underline{s}.\underline{\nabla}(div(\underline{u}))\psi-div(\underline{u})\beta_*\underline{s}.\underline\nabla(\psi)-\beta_*\underline{s}.\underline{\nabla}(\underline{u}.\underline{\nabla}\psi)=-\underline{s}.\underline{\nabla}(div(\underline{u}))\\
+      \phi\frac{\partial \psi^\perp}{\partial t}-\beta_*\underline{t}.\underline{\nabla}(div(\underline{u}))\psi-div(\underline{u})\beta_*\underline{t}.\underline\nabla(\psi)-\beta_*\underline{t}.\underline{\nabla}(\underline{u}.\underline{\nabla}\psi)=-\underline{t}.\underline{\nabla}(div(\underline{u}))
+    \end{array}\right.
+  \]
+  On a donc un terme de relaxation qu'il faudra contrôler via le rapport $\Delta t\leq\frac\phi\beta_*$
+  \[-\beta_*\underline{\nabla}(div(\underline{u}))\psi\]
+  Un terme d'advection, qu'il faudra contrôler
+  \[-div(\underline{u})\beta_*\underline\nabla(\psi)\]
+  Un terme qu'on connaît peu
+  \[-\beta_*\underline{\nabla}(\underline{u}.\underline{\nabla}\psi)\]
+  Et le terme source
+  \[-\underline{\nabla}(div(\underline{u}))\]
 \end{document}
