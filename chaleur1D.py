@@ -19,6 +19,11 @@ def mult(liste, scalaire):
 	return retour
 
 def euler1D(lx,tmax,D,dx,dt):
+	#vérification des paramètres
+	if dt>dx/(a*1.):
+		print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
+		dt=dx/(2.*a)
+
 	#grandeurs relatives à l'équation
 	nuD=D*dt/(dx*dx)
 	nuA=a*dt/dx
@@ -45,7 +50,7 @@ def euler1D(lx,tmax,D,dx,dt):
 	if diffusion and advection:
 		if dt>dx/(a*1.):
 			print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
-			dt=dx/(10.*a)
+			dt=dx/(2.*a)
 		A=I(nx)+nuD*B(nx)+nuA*C(nx)
 	#la matrice du schéma de diffusion pure
 	elif diffusion:
@@ -53,7 +58,7 @@ def euler1D(lx,tmax,D,dx,dt):
 	elif advection:
 		if dt>dx/(a*1.):
 			print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
-			dt=dx/(10.*a)
+			dt=dx/(2.*a)
 		A=I(nx)+nuA*C(nx)
 
 	#on implémente le schéma d'euler

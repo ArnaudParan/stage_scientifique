@@ -33,7 +33,7 @@ a=1E1
 
 #définition du maillage et du temps
 lx=1E1
-tmax=5*1e-1
+tmax=1*1e+2
 
 #nombre d'affichages
 naff=10
