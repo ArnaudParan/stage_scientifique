@@ -20,7 +20,7 @@
 
   \section{Étude de l'équation simplifiée}
       
-  \subsection{Équation d'Exner}
+  \subsection{Obtention du systèmé d'équations}
   Voici l'équation d'Exner, avec un terme $\underline{q}$ à expliciter
   \begin{equation}\label{eq}
     \phi\frac{\partial z}{\partial t}+div\underline{q}=0
@@ -36,17 +36,29 @@
   En linéarisant, et en utilisant la formule de la divergence
   \[\phi\frac{\partial z}{\partial t}+div(\underline{u})(1-\beta_*\psi)-\beta_*\underline{u}.\underline{\nabla}\psi=0\]
   On passe au gradient pour obtenir
-  \[\left\{\begin{array}{l}
+  
+  \begin{equation}
+    \left\{\begin{array}{l}
       \phi\frac{\partial \psi}{\partial t}-\beta_*\underline{s}.\underline{\nabla}(div(\underline{u}))\psi-div(\underline{u})\beta_*\underline{s}.\underline\nabla(\psi)-\beta_*\underline{s}.\underline{\nabla}(\underline{u}.\underline{\nabla}\psi)=-\underline{s}.\underline{\nabla}(div(\underline{u}))\\
       \phi\frac{\partial \psi^\perp}{\partial t}-\beta_*\underline{t}.\underline{\nabla}(div(\underline{u}))\psi-div(\underline{u})\beta_*\underline{t}.\underline\nabla(\psi)-\beta_*\underline{t}.\underline{\nabla}(\underline{u}.\underline{\nabla}\psi)=-\underline{t}.\underline{\nabla}(div(\underline{u}))
     \end{array}\right.
-  \]
-  On a donc un terme de relaxation qu'il faudra contrôler via le rapport $\Delta t\leq\frac\phi\beta_*$
+  \end{equation}
+  
+  \subsubsection{Terme de relaxation}
+  On a un terme de relaxation
   \[-\beta_*\underline{\nabla}(div(\underline{u}))\psi\]
-  Un terme d'advection, qu'il faudra contrôler
+  On remarque que si $\phi\beta_*\underline s\underline{\nabla}(div(\underline{u}))\geq0$ ou
+  $\phi\beta_*\underline s\underline{\nabla}(div(\underline{u}))\geq0$, nos solutions divergent. D'autre part, si on obtient
+  une solution non divergente, il faudra aussi contrôler le rapport
+  $\Delta t\leq\frac\phi{\beta_*|\underline\nabla(div(\underline u))|}$
+  \subsubsection{Terme d'advection}
+  On a aussi un terme d'advection
   \[-div(\underline{u})\beta_*\underline\nabla(\psi)\]
+  Il faudra le contrôler à l'aide d'un schéma décentré et de la jauge $\Delta t\leq \frac{\phi\Delta x}{div(\underline u) \beta_*}$
+  \subsubsection{Gradient de produit scalaire}
   Un terme qu'on connaît peu
   \[-\beta_*\underline{\nabla}(\underline{u}.\underline{\nabla}\psi)\]
+  \subsubsection{Terme source}
   Et le terme source
   \[-\underline{\nabla}(div(\underline{u}))\]
 \end{document}

@@ -32,13 +32,13 @@ def erreurt(Uapp,Uf,dx,dt,dxf,dtf):
 			if(err< abs(interpolt(Uf,j,i*dt/dtf,dxf)-Uapp[i][j])):
 				err= abs(interpolt(Uf,j,i*dt/dtf,dxf)-Uapp[i][j])
 	return err
-
+"""
 #listes dans lesquelles on va stocker les erreurs
 errx=[]
 errt=[]
 
 #représente des delta qu'on va utiliser
-fact=range(10,110,10)
+fact=range(100,1100,100)
 
 #calcule l'erreur en x
 for i in fact:
@@ -53,7 +53,7 @@ for i in fact:
 	dt=tmax/i
 	#tracer(euler1D(lx,tmax,D,dx,dt),lx,tmax,dx,dt,naff)
 	errt.append(erreurt(euler1D(lx,tmax,D,dx,dt),UFin,dx,dt,dxFin,dtFin))
-
+"""
 #graphe solution finale
 tracer(UFin,lx,tmax,dx,dt,naff)
 #graphe erreur en x

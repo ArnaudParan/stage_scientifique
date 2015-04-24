@@ -25,4 +25,34 @@ def conjugate_gradient(A, b, x0, MAX_ITERATIONS = 100, TOLERANCE = 1.0e-10):
 		b = float(np.dot(ri.T, ri)/np.dot(r0.T, r0))
 		p = ri + b * p
 		r0 = ri
-		return x
+	print("attention, matrice non inversée avec le gradient conjugué")
+	return x
+
+
+def GC(A,b,MaxIterations=100,erreur=1e-10):
+	#préconditionnement
+	x=b
+
+	#gradient conjugué
+	#gradient
+	g=np.dot(A,x)-b
+	gAncien=g
+	#direction de descente
+	h=-g
+	for i in xrange(MaxIterations):
+		#pas de descente
+		rho=-float((np.dot(g,h)/np.dot(np.dot(A,h),h)))
+		#calcul de xi+1
+		x=x+rho*h
+		g=np.dot(A,x)-b
+		#gestion de l'erreur
+		m_erreur=np.linalg.norm(g)
+		if m_erreur < erreur:
+			return x
+		#calcul du futur pas de descente
+		gamma=np.dot(g,g)/np.dot(gAncien,gAncien)
+		d=-g+gamma*d
+		gAncien=g
+	print('Erreur, matrice non inversée')
+	return x
+
