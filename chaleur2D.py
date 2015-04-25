@@ -50,18 +50,38 @@ def By(n,m):
 		for y in range(1,m-1):
 			B[to1d(x,y+1,n)][to1d(x,y,n)]=-1.
 			B[to1d(x,y-1,n)][to1d(x,y,n)]=-1.
-		B[to1d(x,0,n)][to1d(x,n-1,n)]=-1.
+		B[to1d(x,0,n)][to1d(x,m-1,n)]=-1.
 		B[to1d(x,m-1,n)][to1d(x,0,n)]=-1.
-		B[to1d(x,m-2,n)][to1d(x,n-1,n)]=-1.
+		B[to1d(x,m-2,n)][to1d(x,m-1,n)]=-1.
 		B[to1d(x,1,n)][to1d(x,0,n)]=-1.
 	return csr_matrix(B)
 
-"""#matrice pour l'advection
-def C(m,n):
-	C=np.diag(-np.ones(n-1),-1)
-	C+=np.diag(np.ones(n),0)
-	C[0][n-1]=-1
-	return csr_matrix(C)"""
+#matrice pour l'advection"
+def Cx(n,m):
+	B=(1.)*np.identity(n*m)
+	for y in range(0,m):
+		for x in range(1,n-1):
+			#B[to1d(x+1,y,n)][to1d(x,y,n)]=-1.
+			B[to1d(x-1,y,n)][to1d(x,y,n)]=-1.
+		#B[to1d(0,y,n)][to1d(n-1,y,n)]=-1.
+		#B[to1d(1,y,n)][to1d(0,y,n)]=-1.
+
+		B[to1d(n-1,y,n)][to1d(0,y,n)]=-1.
+		B[to1d(n-2,y,n)][to1d(n-1,y,n)]=-1.
+	return csr_matrix(B)
+	
+def Cy(n,m):
+	B=(1.)*np.identity(n*m)
+	for x in range(0,n):
+		for y in range(1,m-1):
+			#B[to1d(x,y+1,n)][to1d(x,y,n)]=-1.
+			B[to1d(x,y-1,n)][to1d(x,y,n)]=-1.
+		#B[to1d(x,0,n)][to1d(x,n-1,n)]=-1.
+		#B[to1d(x,1,n)][to1d(x,0,n)]=-1.
+
+		B[to1d(x,m-1,n)][to1d(x,0,n)]=-1.
+		B[to1d(x,m-2,n)][to1d(x,n-1,n)]=-1.
+	return csr_matrix(B)
 
 def I(n,m):
 	return csr_matrix(np.identity(m*n))
@@ -82,7 +102,7 @@ def initBord(U, Ubord, nx, ny):
 		U[to1d(0,y,nx)]=Ubord[to1d(0,y,nx)]
 		U[to1d(nx-1,y,nx)]=Ubord[to1d(nx-1,y,nx)]
 
-def euler2D(lx,ly,tmax,D,dx,dy,dt):
+def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt):
 	#vérification des paramètres
 	if dt>dx/abs(a*10.) or dt>dy/abs(a*10.):
 		print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
@@ -91,7 +111,8 @@ def euler2D(lx,ly,tmax,D,dx,dy,dt):
 	#grandeurs relatives à l'équation
 	nuDx=D*dt/(dx*dx)
 	nuDy=D*dt/(dy*dy)
-	#nuA=a*dt/dx
+	nuAx=ax*dt/dx
+	nuAy=ay*dt/dy
 	nx=int(lx/dx)
 	ny=int(ly/dy)
 	nt=int(tmax/dt)
@@ -111,7 +132,13 @@ def euler2D(lx,ly,tmax,D,dx,dy,dt):
 	#définition de la solution
 	U=[U0]
 
-	A=I(nx,ny)+nuDx*Bx(nx,ny)+nuDy*By(nx,ny)
+	#définition du schéma
+	if diffusion and advection:
+		A=I(nx,ny)+nuDx*Bx(nx,ny)+nuDy*By(nx,ny)+nuAx*Cx(nx,ny)+nuAy*Cy(nx,ny)
+	elif diffusion:
+		A=I(nx,ny)+nuDx*Bx(nx,ny)+nuDy*By(nx,ny)
+	elif advection:
+		A=I(nx,ny)+nuAx*Cx(nx,ny)+nuAy*Cy(nx,ny)
 
 	#on implémente le schéma d'euler
 	for n in range(1,nt):

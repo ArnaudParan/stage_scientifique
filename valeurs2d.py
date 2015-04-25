@@ -10,7 +10,9 @@ advection=True
 
 #coeff diffusion
 D=1E1
-a=-1E-1
+a=1E-1
+ax=a
+ay=a
 
 #définition du maillage et du temps
 lx=1E1
