@@ -1,0 +1,11 @@
+Si vous voulez utiliser l'algorithme ici présent, voici un bref descriptif de la version actuelle
+
+Le fichier valeurs contient les conditions de bord, les conditions initiales, les coefficients de diffusion et d'advection, le choix du type d'équation à intégrer
+
+chaleur 1D gère la création des solutions et les trace
+
+erreur manage tout, si vous voulez voir vos résultats, utilisez erreur
+
+gradientConjugué est obsolète
+
+rapport.tex contient des informations sur le vrai shéma à intégrer. Toute l'analyse n'a pas encore été réalisée, il reste beaucoup de points noirs

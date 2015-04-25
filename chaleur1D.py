@@ -11,6 +11,25 @@ from scipy.sparse import csr_matrix
 from scipy.sparse import*
 from scipy.sparse.linalg.isolve.iterative import cg
 
+#matrice pour la diffusion thermique
+def B(n):
+	B=np.diag(np.ones(n-1),1)
+	B+=B.transpose()
+	B+=(-2)*np.identity(n)
+	B[0][n-1]=1.
+	B[n-1][0]=1.
+	return csr_matrix((-1)*B)
+
+#matrice pour l'advection
+def C(n):
+	C=np.diag(-np.ones(n-1),-1)
+	C+=np.diag(np.ones(n),0)
+	C[0][n-1]=-1
+	return csr_matrix(C)
+
+def I(n):
+	return csr_matrix(np.identity(n))
+
 #fonction annexe multipliant tous les termes d'une liste par un scalaire
 def mult(liste, scalaire):
 	retour=[]
@@ -20,17 +39,17 @@ def mult(liste, scalaire):
 
 def euler1D(lx,tmax,D,dx,dt):
 	#vérification des paramètres
-	if dt>dx/(a*1.):
+	if dt>dx/abs(a*10.):
 		print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
-		dt=dx/(2.*a)
+		dt=dx/abs(10.*a)
 
 	#grandeurs relatives à l'équation
 	nuD=D*dt/(dx*dx)
 	nuA=a*dt/dx
 	nx=1+int(lx/dx)
 	nt=1+int(tmax/dt)
-	print(dx)
-	print(dt)
+	print('nuD '+str(nuD))
+	print('nuA '+str(nuA))
 
 	#condition initiale intérieure
 	U0=np.array([0.]*nx)
@@ -48,17 +67,11 @@ def euler1D(lx,tmax,D,dx,dt):
 	U=[U0]
 
 	if diffusion and advection:
-		if dt>dx/(a*1.):
-			print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
-			dt=dx/(2.*a)
 		A=I(nx)+nuD*B(nx)+nuA*C(nx)
 	#la matrice du schéma de diffusion pure
 	elif diffusion:
 		A=I(nx)+nuD*B(nx)
 	elif advection:
-		if dt>dx/(a*1.):
-			print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
-			dt=dx/(2.*a)
 		A=I(nx)+nuA*C(nx)
 
 	#on implémente le schéma d'euler

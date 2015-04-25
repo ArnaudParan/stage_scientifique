@@ -14,6 +14,7 @@ a=-1E-1
 
 #définition du maillage et du temps
 lx=1E1
+ly=1E1
 tmax=1*1e-1
 
 #nombre d'affichages
@@ -23,20 +24,18 @@ naff=10
 Tmax=10.
 
 #condition initiale intérieure
-def u0(x):
-	epsilon=lx/20.
-	if(x<=lx/4.+epsilon and x>=lx/4.-epsilon):
-		return 10.
-	elif(x<=3.*lx/4.+epsilon and x>=3.*lx/4.-epsilon):
+def u0_2d(x,y):
+	epsilon=lx/5.
+	if(x<=lx/2.+epsilon and x>=lx/2.-epsilon and y<=ly/2.+epsilon and y>=ly/2.-epsilon):
 		return 10.
 	return 0.
 
 #conditions de bord
-def ubord(x):
-	"""if(x==0.):
+def ubord_2d(x,y):
+	if(x==0.):
 		return 10.
 	elif(x==lx):
-		return 10."""
+		return 10.
 	return 0.
 
 
