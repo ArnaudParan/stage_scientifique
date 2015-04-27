@@ -7,7 +7,9 @@ from scipy.sparse import csr_matrix
 #si on intègre advection ou diffusion ou les deux
 diffusion=False
 advection=True
-up=False
+schema_adv='down'
+schema_advx=schema_adv
+schema_advy=schema_adv
 
 #coeff diffusion
 D=1E1

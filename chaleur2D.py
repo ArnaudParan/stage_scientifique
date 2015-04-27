@@ -58,35 +58,57 @@ def By(n,m):
 
 #matrice pour l'advection"
 def Cx(n,m):
-	for y in range(0,m):
-		if up:
-			Cx=(1.)*np.identity(n*m)
-			for x in range(1,n-1):
-				Cx[to1d(x-1,y,n)][to1d(x,y,n)]=-1.
-			Cx[to1d(n-1,y,n)][to1d(0,y,n)]=-1.
-			Cx[to1d(n-2,y,n)][to1d(n-1,y,n)]=-1.
-		else:
-			Cx=(-1.)*np.identity(n*m)
+	if schema_advx=='up':
+		Cx=(-1.)*np.identity(n*m)
+		for y in range(0,m):
 			for x in range(1,n-1):
 				Cx[to1d(x+1,y,n)][to1d(x,y,n)]=1.
 			Cx[to1d(0,y,n)][to1d(n-1,y,n)]=1.
 			Cx[to1d(1,y,n)][to1d(0,y,n)]=1.
+	elif schema_advx=='down':
+		Cx=(1.)*np.identity(n*m)
+		for y in range(0,m):
+			for x in range(1,n-1):
+				Cx[to1d(x-1,y,n)][to1d(x,y,n)]=-1.
+			Cx[to1d(n-1,y,n)][to1d(0,y,n)]=-1.
+			Cx[to1d(n-2,y,n)][to1d(n-1,y,n)]=-1.
+	elif schema_advx=='center':
+		Cx=(0.)*np.identity(n*m)
+		for y in range(0,m):
+			for x in range(1,n-1):
+				Cx[to1d(x+1,y,n)][to1d(x,y,n)]=-1.
+				Cx[to1d(x-1,y,n)][to1d(x,y,n)]=-1.
+			Cx[to1d(n-1,y,n)][to1d(0,y,n)]=-1.
+			Cx[to1d(n-2,y,n)][to1d(n-1,y,n)]=-1.
+			Cx[to1d(0,y,n)][to1d(n-1,y,n)]=-1.
+			Cx[to1d(1,y,n)][to1d(0,y,n)]=-1.
 	return csr_matrix(Cx)
 	
 def Cy(n,m):
-	for x in range(0,n):
-		if up:
-			B=(1.)*np.identity(n*m)
-			for y in range(1,m-1):
-				B[to1d(x,y-1,n)][to1d(x,y,n)]=-1.
-			B[to1d(x,m-1,n)][to1d(x,0,n)]=-1.
-			B[to1d(x,m-2,n)][to1d(x,n-1,n)]=-1.
-		else:
-			B=(-1.)*np.identity(n*m)
+	if schema_advy=='up':
+		B=(-1.)*np.identity(n*m)
+		for x in range(0,n):
 			for y in range(1,m-1):
 				B[to1d(x,y+1,n)][to1d(x,y,n)]=1.
 			B[to1d(x,0,n)][to1d(x,n-1,n)]=1.
 			B[to1d(x,1,n)][to1d(x,0,n)]=1.
+	elif schema_advy=='down':
+		B=(1.)*np.identity(n*m)
+		for x in range(0,n):
+			for y in range(1,m-1):
+				B[to1d(x,y-1,n)][to1d(x,y,n)]=-1.
+			B[to1d(x,m-1,n)][to1d(x,0,n)]=-1.
+			B[to1d(x,m-2,n)][to1d(x,n-1,n)]=-1.
+	elif schema_advy=='center':
+		B=(0.)*np.identity(n*m)
+		for x in range(0,n):
+			for y in range(1,m-1):
+				B[to1d(x,y-1,n)][to1d(x,y,n)]=-1.
+				B[to1d(x,y+1,n)][to1d(x,y,n)]=-1.
+			B[to1d(x,m-1,n)][to1d(x,0,n)]=-1.
+			B[to1d(x,m-2,n)][to1d(x,n-1,n)]=-1.
+			B[to1d(x,0,n)][to1d(x,n-1,n)]=-1.
+			B[to1d(x,1,n)][to1d(x,0,n)]=-1.
 	return csr_matrix(B)
 
 def I(n,m):
@@ -110,13 +132,13 @@ def initBord(U, Ubord, nx, ny):
 
 def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt):
 	#vérification des paramètres
-	if advection and (dt>dx/abs(a*10.) or dt>dy/abs(a*10.)):
+	if advection and (dt>dx/abs(ax*10.) or dt>dy/abs(ay*10.)):
 		print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
-		dt=min([dx,dy])/abs(10.*a)
+		dt=min([dx/abs(10.*ax),dy/abs(10.*ay)])
 	#vérification des paramètres
-	if (dt>dx/abs(a*10.) or dt>dy/abs(a*10.)):
+	if (dt>dx/abs(ax*10.) or dt>dy/abs(ay*10.)):
 		print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
-		dt=min([dx,dy])/abs(10.*a)
+		dt=min([dx/abs(10.*ax),dy/abs(10.*ay)])
 
 	#grandeurs relatives à l'équation
 	nuDx=D*dt/(dx*dx)
@@ -126,6 +148,8 @@ def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt):
 	nx=1+int(lx/dx)
 	ny=1+int(ly/dy)
 	nt=1+int(tmax/dt)
+	print('nuD :('+str(nuDx)+','+str(nuDy)+')')
+	print('nuA :('+str(nuAx)+','+str(nuAy)+')')
 
 	#condition initiale intérieure
 	U0=np.array([0.]*nx*ny)
