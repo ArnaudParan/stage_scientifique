@@ -58,29 +58,35 @@ def By(n,m):
 
 #matrice pour l'advection"
 def Cx(n,m):
-	B=(1.)*np.identity(n*m)
 	for y in range(0,m):
-		for x in range(1,n-1):
-			#B[to1d(x+1,y,n)][to1d(x,y,n)]=-1.
-			B[to1d(x-1,y,n)][to1d(x,y,n)]=-1.
-		#B[to1d(0,y,n)][to1d(n-1,y,n)]=-1.
-		#B[to1d(1,y,n)][to1d(0,y,n)]=-1.
-
-		B[to1d(n-1,y,n)][to1d(0,y,n)]=-1.
-		B[to1d(n-2,y,n)][to1d(n-1,y,n)]=-1.
-	return csr_matrix(B)
+		if up:
+			Cx=(1.)*np.identity(n*m)
+			for x in range(1,n-1):
+				Cx[to1d(x-1,y,n)][to1d(x,y,n)]=-1.
+			Cx[to1d(n-1,y,n)][to1d(0,y,n)]=-1.
+			Cx[to1d(n-2,y,n)][to1d(n-1,y,n)]=-1.
+		else:
+			Cx=(-1.)*np.identity(n*m)
+			for x in range(1,n-1):
+				Cx[to1d(x+1,y,n)][to1d(x,y,n)]=1.
+			Cx[to1d(0,y,n)][to1d(n-1,y,n)]=1.
+			Cx[to1d(1,y,n)][to1d(0,y,n)]=1.
+	return csr_matrix(Cx)
 	
 def Cy(n,m):
-	B=(1.)*np.identity(n*m)
 	for x in range(0,n):
-		for y in range(1,m-1):
-			#B[to1d(x,y+1,n)][to1d(x,y,n)]=-1.
-			B[to1d(x,y-1,n)][to1d(x,y,n)]=-1.
-		#B[to1d(x,0,n)][to1d(x,n-1,n)]=-1.
-		#B[to1d(x,1,n)][to1d(x,0,n)]=-1.
-
-		B[to1d(x,m-1,n)][to1d(x,0,n)]=-1.
-		B[to1d(x,m-2,n)][to1d(x,n-1,n)]=-1.
+		if up:
+			B=(1.)*np.identity(n*m)
+			for y in range(1,m-1):
+				B[to1d(x,y-1,n)][to1d(x,y,n)]=-1.
+			B[to1d(x,m-1,n)][to1d(x,0,n)]=-1.
+			B[to1d(x,m-2,n)][to1d(x,n-1,n)]=-1.
+		else:
+			B=(-1.)*np.identity(n*m)
+			for y in range(1,m-1):
+				B[to1d(x,y+1,n)][to1d(x,y,n)]=1.
+			B[to1d(x,0,n)][to1d(x,n-1,n)]=1.
+			B[to1d(x,1,n)][to1d(x,0,n)]=1.
 	return csr_matrix(B)
 
 def I(n,m):
@@ -104,7 +110,11 @@ def initBord(U, Ubord, nx, ny):
 
 def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt):
 	#vérification des paramètres
-	if dt>dx/abs(a*10.) or dt>dy/abs(a*10.):
+	if advection and (dt>dx/abs(a*10.) or dt>dy/abs(a*10.)):
+		print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
+		dt=min([dx,dy])/abs(10.*a)
+	#vérification des paramètres
+	if (dt>dx/abs(a*10.) or dt>dy/abs(a*10.)):
 		print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
 		dt=min([dx,dy])/abs(10.*a)
 
@@ -113,9 +123,9 @@ def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt):
 	nuDy=D*dt/(dy*dy)
 	nuAx=ax*dt/dx
 	nuAy=ay*dt/dy
-	nx=int(lx/dx)
-	ny=int(ly/dy)
-	nt=int(tmax/dt)
+	nx=1+int(lx/dx)
+	ny=1+int(ly/dy)
+	nt=1+int(tmax/dt)
 
 	#condition initiale intérieure
 	U0=np.array([0.]*nx*ny)
@@ -151,11 +161,11 @@ def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt):
 
 def tracer(U,lx,ly,tmax,dx,dy,dt,n=naff, T=Tmax):
 	#on trace la solution
-	nx=int(lx/dx)
-	ny=int(ly/dy)
-	nt=int(tmax/dt)
-	x=np.arange(0,nx)
-	y=np.arange(0,ny)
+	nx=1+int(lx/dx)
+	ny=1+int(ly/dy)
+	nt=1+int(tmax/dt)
+	x=mult(np.arange(0,nx),dx)
+	y=mult(np.arange(0,ny),dy)
 	x,y=np.meshgrid(x,y)
 	#première méthode, affiche des pages
 	"""for n in range(0,n):

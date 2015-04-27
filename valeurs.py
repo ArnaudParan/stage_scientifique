@@ -5,12 +5,12 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 #si on intègre advection ou diffusion ou les deux
-diffusion=False
-advection=True
+diffusion=True
+advection=False
 
 #coeff diffusion
 D=1E1
-a=-1E-1
+a=1E1
 
 #définition du maillage et du temps
 lx=1E1

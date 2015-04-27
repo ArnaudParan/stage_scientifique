@@ -7,17 +7,18 @@ from scipy.sparse import csr_matrix
 #si on intègre advection ou diffusion ou les deux
 diffusion=False
 advection=True
+up=False
 
 #coeff diffusion
 D=1E1
-a=1E-1
+a=1E1
 ax=a
 ay=a
 
 #définition du maillage et du temps
 lx=1E1
 ly=1E1
-tmax=1*1e-1
+tmax=1*1e-0
 
 #nombre d'affichages
 naff=10
@@ -34,12 +35,17 @@ def u0_2d(x,y):
 
 #conditions de bord
 def ubord_2d(x,y):
-	if(x==0.):
+	"""if(x==0.):
 		return 10.
 	elif(x==lx):
 		return 10.
-	return 0.
+	if(y==0.):
+		return 10.
+	elif(y==ly):
+		return 10."""
+	return 0.	
 
 
-dx=lx/100.
+dx=lx/50.
+dy=ly/50.
 dt=tmax/100.
