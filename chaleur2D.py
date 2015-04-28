@@ -6,6 +6,7 @@ import numpy as np
 import pylab as pl
 from pylab import*
 from valeurs import*
+from matrices import*
 from valeurs2d import*
 import matplotlib.pyplot as plt
 import scipy as scipy
@@ -16,176 +17,99 @@ from pylab import *
 from mpl_toolkits.mplot3d import Axes3D
 
 
-#fait la transition de la représentation machine en 1D à la représentation humaine en 2D
-def to1d(i,j,n):
-	return i+n*j
-
-def to2d(a,n):
-	return [a%n,int(a/n)]
-
-def to2dArray(u,n,m):
-	retour=[]
-	for i in range(n):
-		retour.append([0]*m)
-	for i in range(n*m):
-		retour[(i%n)][(i/n)]=u[i]
-	return retour
-
-#matrice pour la diffusion thermique
-def Bx(n,m):
-	B=(2.)*np.identity(n*m)
-	for y in range(0,m):
-		for x in range(1,n-1):
-			B[to1d(x+1,y,n)][to1d(x,y,n)]=-1.
-			B[to1d(x-1,y,n)][to1d(x,y,n)]=-1.
-		B[to1d(0,y,n)][to1d(n-1,y,n)]=-1.
-		B[to1d(n-1,y,n)][to1d(0,y,n)]=-1.
-		B[to1d(n-2,y,n)][to1d(n-1,y,n)]=-1.
-		B[to1d(1,y,n)][to1d(0,y,n)]=-1.
-	return csr_matrix(B)
-	
-def By(n,m):
-	B=(2.)*np.identity(n*m)
-	for x in range(0,n):
-		for y in range(1,m-1):
-			B[to1d(x,y+1,n)][to1d(x,y,n)]=-1.
-			B[to1d(x,y-1,n)][to1d(x,y,n)]=-1.
-		B[to1d(x,0,n)][to1d(x,m-1,n)]=-1.
-		B[to1d(x,m-1,n)][to1d(x,0,n)]=-1.
-		B[to1d(x,m-2,n)][to1d(x,m-1,n)]=-1.
-		B[to1d(x,1,n)][to1d(x,0,n)]=-1.
-	return csr_matrix(B)
-
-#matrice pour l'advection"
-def Cx(n,m):
-	if schema_advx=='up':
-		Cx=(-1.)*np.identity(n*m)
-		for y in range(0,m):
-			for x in range(1,n-1):
-				Cx[to1d(x+1,y,n)][to1d(x,y,n)]=1.
-			Cx[to1d(0,y,n)][to1d(n-1,y,n)]=1.
-			Cx[to1d(1,y,n)][to1d(0,y,n)]=1.
-	elif schema_advx=='down':
-		Cx=(1.)*np.identity(n*m)
-		for y in range(0,m):
-			for x in range(1,n-1):
-				Cx[to1d(x-1,y,n)][to1d(x,y,n)]=-1.
-			Cx[to1d(n-1,y,n)][to1d(0,y,n)]=-1.
-			Cx[to1d(n-2,y,n)][to1d(n-1,y,n)]=-1.
-	elif schema_advx=='center':
-		Cx=(0.)*np.identity(n*m)
-		for y in range(0,m):
-			for x in range(1,n-1):
-				Cx[to1d(x+1,y,n)][to1d(x,y,n)]=1.
-				Cx[to1d(x-1,y,n)][to1d(x,y,n)]=-1.
-			Cx[to1d(n-1,y,n)][to1d(0,y,n)]=-1.
-			Cx[to1d(n-2,y,n)][to1d(n-1,y,n)]=-1.
-			Cx[to1d(0,y,n)][to1d(n-1,y,n)]=1.
-			Cx[to1d(1,y,n)][to1d(0,y,n)]=1.
-	return csr_matrix(Cx)
-	
-def Cy(n,m):
-	if schema_advy=='up':
-		B=(-1.)*np.identity(n*m)
-		for x in range(0,n):
-			for y in range(1,m-1):
-				B[to1d(x,y+1,n)][to1d(x,y,n)]=1.
-			B[to1d(x,0,n)][to1d(x,n-1,n)]=1.
-			B[to1d(x,1,n)][to1d(x,0,n)]=1.
-	elif schema_advy=='down':
-		B=(1.)*np.identity(n*m)
-		for x in range(0,n):
-			for y in range(1,m-1):
-				B[to1d(x,y-1,n)][to1d(x,y,n)]=-1.
-			B[to1d(x,m-1,n)][to1d(x,0,n)]=-1.
-			B[to1d(x,m-2,n)][to1d(x,n-1,n)]=-1.
-	elif schema_advy=='center':
-		B=(0.)*np.identity(n*m)
-		for x in range(0,n):
-			for y in range(1,m-1):
-				B[to1d(x,y-1,n)][to1d(x,y,n)]=-1.
-				B[to1d(x,y+1,n)][to1d(x,y,n)]=1.
-			B[to1d(x,m-1,n)][to1d(x,0,n)]=-1.
-			B[to1d(x,m-2,n)][to1d(x,n-1,n)]=-1.
-			B[to1d(x,0,n)][to1d(x,n-1,n)]=1.
-			B[to1d(x,1,n)][to1d(x,0,n)]=1.
-	return csr_matrix(B)
-
-def I(n,m):
-	return csr_matrix(np.identity(m*n))
 
 #fonction annexe multipliant tous les termes d'une liste par un scalaire
 def mult(liste, scalaire):
-	retour=[]
-	for i in range(0,len(liste)):
-		retour.append(scalaire*liste[i])
-	return retour
+    retour=[]
+    for i in range(0,len(liste)):
+        retour.append(scalaire*liste[i])
+    return retour
 
 #réinitialise le bord dans le code
 def initBord(U, Ubord, nx, ny):
-	for x in range(0,nx):
-		U[to1d(x,0,nx)]=Ubord[to1d(x,0,nx)]
-		U[to1d(x,ny-1,nx)]=Ubord[to1d(x,ny-1,nx)]
-	for y in range(0,ny):
-		U[to1d(0,y,nx)]=Ubord[to1d(0,y,nx)]
-		U[to1d(nx-1,y,nx)]=Ubord[to1d(nx-1,y,nx)]
+    for x in range(0,nx):
+        U[to1d(x,0,nx)]=Ubord[to1d(x,0,nx)]
+        U[to1d(x,ny-1,nx)]=Ubord[to1d(x,ny-1,nx)]
+    for y in range(0,ny):
+        U[to1d(0,y,nx)]=Ubord[to1d(0,y,nx)]
+        U[to1d(nx-1,y,nx)]=Ubord[to1d(nx-1,y,nx)]
 
-def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt):
-	#vérification des paramètres
-	if advection and (dt>dx/abs(ax*10.) or dt>dy/abs(ay*10.)):
-		print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
-		dt=min([dx/abs(10.*ax),dy/abs(10.*ay)])
-	#vérification des paramètres
-	if (dt>dx/abs(ax*10.) or dt>dy/abs(ay*10.)):
-		print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
-		dt=min([dx/abs(10.*ax),dy/abs(10.*ay)])
+def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt,options):
+    diffusion=options[0]
+    advection=options[1]
+    schema_advx=options[2]
+    schema_advy=options[3]
+    #vérification des paramètres
+    if advection and (dt>dx/abs(ax*10.) or dt>dy/abs(ay*10.)):
+        print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
+        dt=min([dx/abs(10.*ax),dy/abs(10.*ay)])
 
-	#grandeurs relatives à l'équation
-	nuDx=D*dt/(dx*dx)
-	nuDy=D*dt/(dy*dy)
-	nuAx=ax*dt/dx
-	nuAy=ay*dt/dy
-	nx=1+int(lx/dx)
-	ny=1+int(ly/dy)
-	nt=1+int(tmax/dt)
-        print('dx :'+str(dx)+' ; dy :'+str(dy)+' ; dt :'+str(dt))
-	#print('nuD :('+str(nuDx)+','+str(nuDy)+')')
-	#print('nuA :('+str(nuAx)+','+str(nuAy)+')')
-	print('erreur :'+str(dx+dy+dt))
-	print('facteur d\'instabilité a :('+str(dt*abs(ax)/dx)+','+str(dt*abs(ay)/dy)+')')
-	print('facteur d\'instabilité D :('+str(dt*abs(2.*D)/(dx*dx))+','+str(dt*abs(2.*D)/(dy*dy))+')')
+    if (dt>dx/abs(ax*10.) or dt>dy/abs(ay*10.)):
+        print('Système mal paramétré, l\'algorithme procède à un reparamétrage')
+        dt=min([dx/abs(10.*ax),dy/abs(10.*ay)])
 
-	#condition initiale intérieure
-	U0=np.array([0.]*nx*ny)
-	for i in range(0,nx*ny):
-		U0[i]=u0_2d(to2d(i,nx)[0]*dx,to2d(i,nx)[1]*dy)
-	
-	#condition de bord
-	Ubord=np.array([0.]*nx*ny)
-	for i in range(0,nx*ny):
-		Ubord[i]=ubord_2d(to2d(i,nx)[0]*dx,to2d(i,nx)[1]*dy)
+    #vérification de l'instabilité
+    if advection and ax<0 and schema_advx=='down':
+        print('Attention, votre schéma étant trop instable, nous en avons choisi un autre')
+        schema_advx='up'
+    if advection and ay<0 and schema_advy=='down':
+        print('Attention, votre schéma étant trop instable, nous en avons choisi un autre')
+        schema_advy='up'
+    if advection and ax>0 and schema_advx=='up':
+        print('Attention, votre schéma étant trop instable, nous en avons choisi un autre')
+        schema_advx='down'
+    if advection and ay>0 and schema_advy=='up':
+        print('Attention, votre schéma étant trop instable, nous en avons choisi un autre')
+        schema_advy='down'
 
-	initBord(U0,Ubord,nx,ny)
+    #grandeurs relatives à l'équation
+    nuDx=D*dt/(dx*dx)
+    nuDy=D*dt/(dy*dy)
+    nuAx=ax*dt/dx
+    nuAy=ay*dt/dy
+    nx=1+int(lx/dx)
+    ny=1+int(ly/dy)
+    nt=1+int(tmax/dt)
+    print('dx :'+str(dx)+' ; dy :'+str(dy)+' ; dt :'+str(dt))
+    print('erreur :'+str(dx+dy+dt))
+    if advection:
+        print('facteur d\'instabilité a :('+str(dt*abs(ax)/dx)+','+str(dt*abs(ay)/dy)+')')
+    if diffusion:
+        print('facteur d\'instabilité D :('+str(dt*abs(2.*D)/(dx*dx))+','+str(dt*abs(2.*D)/(dy*dy))+')')
 
-	#définition de la solution
-	U=[U0]
+    #condition initiale intérieure
+    U0=np.array([0.]*nx*ny)
+    for i in range(0,nx*ny):
+        U0[i]=u0_2d(to2d(i,nx)[0]*dx,to2d(i,nx)[1]*dy)
+    
+    #condition de bord
+    Ubord=np.array([0.]*nx*ny)
+    for i in range(0,nx*ny):
+        Ubord[i]=ubord_2d(to2d(i,nx)[0]*dx,to2d(i,nx)[1]*dy)
 
-	#définition du schéma
-	if diffusion and advection:
-		A=I(nx,ny)+nuDx*Bx(nx,ny)+nuDy*By(nx,ny)+nuAx*Cx(nx,ny)+nuAy*Cy(nx,ny)
-	elif diffusion:
-		A=I(nx,ny)+nuDx*Bx(nx,ny)+nuDy*By(nx,ny)
-	elif advection:
-		A=I(nx,ny)+nuAx*Cx(nx,ny)+nuAy*Cy(nx,ny)
+    initBord(U0,Ubord,nx,ny)
 
-	#on implémente le schéma d'euler
-	for n in range(1,nt):
-		Un=scipy.sparse.linalg.isolve.iterative.bicg(A,U[n-1])[0]
-		#Un=linalg.solve(A,U[n-1])
-		initBord(Un,Ubord,nx,ny)
-		U.append(Un)
-	
-	return [U,lx,ly,tmax,dx,dy,dt]
+    #définition de la solution
+    U=[U0]
+
+    #définition du schéma
+    if diffusion and advection:
+        A=I(nx,ny)+nuDx*Bx(nx,ny)+nuDy*By(nx,ny)+nuAx*Cx(nx,ny,schema_advx)+nuAy*Cy(nx,ny,schema_advy)
+    elif diffusion:
+        A=I(nx,ny)+nuDx*Bx(nx,ny)+nuDy*By(nx,ny)
+    elif advection:
+        A=I(nx,ny)+nuAx*Cx(nx,ny,schema_advx)+nuAy*Cy(nx,ny,schema_advy)
+    elif test:
+        A=I(nx,ny)+s1*nuAx/dx*H11(nx,ny)+s2*nuAy/dy*H22(nx,ny)+(2*nuAx/dx+s1*nuAy/dy)*H12(nx,ny)
+
+    #on implémente le schéma d'euler
+    for n in range(1,nt):
+        Un=scipy.sparse.linalg.isolve.iterative.bicg(A,U[n-1])[0]
+        #Un=linalg.solve(A,U[n-1])
+        initBord(Un,Ubord,nx,ny)
+        U.append(Un)
+    
+    return [U,lx,ly,tmax,dx,dy,dt]
 
 def tracer(sol,n=naff, T=Tmax):
     U=sol[0]
@@ -204,11 +128,11 @@ def tracer(sol,n=naff, T=Tmax):
     x,y=np.meshgrid(x,y)
     #première méthode, affiche des pages
     """for n in range(0,n):
-            fig=figure()
-            ax = Axes3D(fig)
-            ax.plot_surface(x,y,to2dArray(U[n*nt/naff],nx,ny), rstride=1, cstride=1, cmap='hot')
-            ax.set_zlim(0,10)
-            show()"""
+        fig=figure()
+        ax = Axes3D(fig)
+        ax.plot_surface(x,y,to2dArray(U[n*nt/naff],nx,ny), rstride=1, cstride=1, cmap='hot')
+        ax.set_zlim(0,10)
+        show()"""
 
     #autre méthode, on trace sur la même fenêtre
     fig1=figure(1)

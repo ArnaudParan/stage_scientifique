@@ -6,21 +6,25 @@ from scipy.sparse import csr_matrix
 
 #si on intègre advection ou diffusion ou les deux
 diffusion=False
-advection=True
-schema_adv='down'
+advection=False
+test=True
+#up down ou center
+schema_adv='up'
 schema_advx=schema_adv
 schema_advy=schema_adv
 
 #coeff diffusion
 D=1E1
 a=1E1
-ax=a
+ax=-a
 ay=a
+s1=1.
+s2=0.
 
 #définition du maillage et du temps
 lx=1E1
 ly=1E1
-tmax=1*1e-0
+tmax=1*1e0
 
 #nombre d'affichages
 naff=10
@@ -48,6 +52,7 @@ def ubord_2d(x,y):
 	return 0.	
 
 
-dx=lx/50.
-dy=ly/50.
+dx=lx/10.
+dy=ly/10.
 dt=tmax/100.
+options=[diffusion,advection,schema_advx,schema_advx]
