@@ -152,7 +152,8 @@ def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt):
 	#print('nuD :('+str(nuDx)+','+str(nuDy)+')')
 	#print('nuA :('+str(nuAx)+','+str(nuAy)+')')
 	print('erreur :'+str(dx+dy+dt))
-	print('facteur d\'instabilité :('+str(dt*abs(ax)/dx)+','+str(dt*abs(ay)/dy)+')')
+	print('facteur d\'instabilité a :('+str(dt*abs(ax)/dx)+','+str(dt*abs(ay)/dy)+')')
+	print('facteur d\'instabilité D :('+str(dt*abs(2.*D)/(dx*dx))+','+str(dt*abs(2.*D)/(dy*dy))+')')
 
 	#condition initiale intérieure
 	U0=np.array([0.]*nx*ny)
@@ -184,46 +185,53 @@ def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt):
 		initBord(Un,Ubord,nx,ny)
 		U.append(Un)
 	
-	return U
+	return [U,lx,ly,tmax,dx,dy,dt]
 
-def tracer(U,lx,ly,tmax,dx,dy,dt,n=naff, T=Tmax):
-	#on trace la solution
-	nx=1+int(lx/dx)
-	ny=1+int(ly/dy)
-	nt=1+int(tmax/dt)
-	x=mult(np.arange(0,nx),dx)
-	y=mult(np.arange(0,ny),dy)
-	x,y=np.meshgrid(x,y)
-	#première méthode, affiche des pages
-	"""for n in range(0,n):
-		fig=figure()
-		ax = Axes3D(fig)
-		ax.plot_surface(x,y,to2dArray(U[n*nt/naff],nx,ny), rstride=1, cstride=1, cmap='hot')
-		ax.set_zlim(0,10)
-		show()"""
+def tracer(sol,n=naff, T=Tmax):
+    U=sol[0]
+    lx=sol[1]
+    ly=sol[2]
+    tmax=sol[3]
+    dx=sol[4]
+    dy=sol[5]
+    dt=sol[6]
+    #on trace la solution
+    nx=1+int(lx/dx)
+    ny=1+int(ly/dy)
+    nt=1+int(tmax/dt)
+    x=mult(np.arange(0,nx),dx)
+    y=mult(np.arange(0,ny),dy)
+    x,y=np.meshgrid(x,y)
+    #première méthode, affiche des pages
+    """for n in range(0,n):
+            fig=figure()
+            ax = Axes3D(fig)
+            ax.plot_surface(x,y,to2dArray(U[n*nt/naff],nx,ny), rstride=1, cstride=1, cmap='hot')
+            ax.set_zlim(0,10)
+            show()"""
 
-	#autre méthode, on trace sur la même fenêtre
-	fig1=figure(1)
-	ax = Axes3D(fig1)
-	ax.plot_surface(x,y,to2dArray(U[0],nx,ny), rstride=1, cstride=1, cmap=cm.jet)
-	ax.set_zlim(0,10)
-	show()
+    #autre méthode, on trace sur la même fenêtre
+    fig1=figure(1)
+    ax = Axes3D(fig1)
+    ax.plot_surface(x,y,to2dArray(U[0],nx,ny), rstride=1, cstride=1, cmap=cm.jet)
+    ax.set_zlim(0,10)
+    show()
 
-	fig2=figure(2)
-	ax = Axes3D(fig2)
-	ax.plot_surface(x,y,to2dArray(U[nt/3],nx,ny), rstride=1, cstride=1, cmap=cm.jet)
-	ax.set_zlim(0,10)
-	show()
+    fig2=figure(2)
+    ax = Axes3D(fig2)
+    ax.plot_surface(x,y,to2dArray(U[nt/3],nx,ny), rstride=1, cstride=1, cmap=cm.jet)
+    ax.set_zlim(0,10)
+    show()
 
-	fig3=figure(3)
-	ax = Axes3D(fig3)
-	ax.plot_surface(x,y,to2dArray(U[2*nt/3],nx,ny), rstride=1, cstride=1, cmap=cm.jet)
-	ax.set_zlim(0,10)
-	show()
-	
-	fig4=figure(4)
-	ax = Axes3D(fig4)
-	ax.plot_surface(x,y,to2dArray(U[nt-1],nx,ny), rstride=1, cstride=1, cmap=cm.jet)
-	ax.set_zlim(0,10)
+    fig3=figure(3)
+    ax = Axes3D(fig3)
+    ax.plot_surface(x,y,to2dArray(U[2*nt/3],nx,ny), rstride=1, cstride=1, cmap=cm.jet)
+    ax.set_zlim(0,10)
+    show()
+    
+    fig4=figure(4)
+    ax = Axes3D(fig4)
+    ax.plot_surface(x,y,to2dArray(U[nt-1],nx,ny), rstride=1, cstride=1, cmap=cm.jet)
+    ax.set_zlim(0,10)
 
-	show()
+    show()
