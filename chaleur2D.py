@@ -65,11 +65,16 @@ def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt,options):
     #grandeurs relatives à l'équation
     nuDx=D*dt/(dx*dx)
     nuDy=D*dt/(dy*dy)
+    nuAx=ax*dt/dx
+    nuAy=ay*dt/dy
+    #terme hessien
     nuH1=s1*s1*dt/(dx*dx)
     nuH2=s2*s2*dt/(dy*dy)
     nuHcrois=2.*s1*s2*dt/(dx*dy)
-    nuAx=ax*dt/dx
-    nuAy=ay*dt/dy
+    #terme hessien orthogonal
+    #nuH1=-s1*s2*dt/(dx*dx)
+    #nuH2=s1*s2*dt/(dy*dy)
+    #nuHcrois=0.
     nx=1+int(lx/dx)
     ny=1+int(ly/dy)
     nt=1+int(tmax/dt)

@@ -18,8 +18,8 @@ D=1E1
 a=1E0
 ax=-a
 ay=a
-s1=1e0
-s2=-1e0
+s1=-5.*1e-1
+s2=-5.*1e-1
 
 #définition du maillage et du temps
 lx=1E1
