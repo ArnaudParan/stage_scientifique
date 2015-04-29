@@ -18,13 +18,13 @@ D=1E1
 a=1E0
 ax=-a
 ay=a
-s1=-5.*1e-1
-s2=-5.*1e-1
+s1=1.*1e0
+s2=1.*1e-0
 
 #définition du maillage et du temps
 lx=1E1
 ly=1E1
-tmax=1*1e0
+tmax=1*1e1
 
 #nombre d'affichages
 naff=10
@@ -34,21 +34,21 @@ Tmax=10.
 
 #condition initiale intérieure
 def u0_2d(x,y):
-	epsilon=lx/5.
-	if(x<=lx/2.+epsilon and x>=lx/2.-epsilon and y<=ly/2.+epsilon and y>=ly/2.-epsilon):
-		return 10.
+	epsilon=min([lx,ly])/5.
+	"""if(x<=lx/2.+epsilon and x>=lx/2.-epsilon and y<=ly/2.+epsilon and y>=ly/2.-epsilon):
+		return 10."""
 	return 0.
 
 #conditions de bord
 def ubord_2d(x,y):
-	"""if(x==0.):
+	if(x==0.):
 		return 10.
 	elif(x==lx):
 		return 10.
 	if(y==0.):
 		return 10.
 	elif(y==ly):
-		return 10."""
+		return 10.
 	return 0.	
 
 
