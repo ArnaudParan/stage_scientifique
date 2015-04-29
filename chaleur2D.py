@@ -65,6 +65,9 @@ def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt,options):
     #grandeurs relatives à l'équation
     nuDx=D*dt/(dx*dx)
     nuDy=D*dt/(dy*dy)
+    nuH1=s1*s1*dt/(dx*dx)
+    nuH2=s2*s2*dt/(dy*dy)
+    nuHcrois=2.*s1*s2*dt/(dx*dy)
     nuAx=ax*dt/dx
     nuAy=ay*dt/dy
     nx=1+int(lx/dx)
@@ -75,7 +78,9 @@ def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt,options):
     if advection:
         print('facteur d\'instabilité a :('+str(dt*abs(ax)/dx)+','+str(dt*abs(ay)/dy)+')')
     if diffusion:
-        print('facteur d\'instabilité D :('+str(dt*abs(2.*D)/(dx*dx))+','+str(dt*abs(2.*D)/(dy*dy))+')')
+        print('faux facteur d\'instabilité D :('+str(dt*abs(2.*D)/(dx*dx))+','+str(dt*abs(2.*D)/(dy*dy))+')')
+    if dif_autre:
+        print('faux facteur d\'instabilité D\' :('+str(dt*abs(2.*s1*s1)/(dx*dx))+','+str(dt*abs(4.*s1*s2)/(dx*dy))+','+str(dt*abs(2.*s2*s2)/(dy*dy))+')')
 
     #condition initiale intérieure
     U0=np.array([0.]*nx*ny)
@@ -99,8 +104,8 @@ def euler2D(lx,ly,tmax,D,ax,ay,dx,dy,dt,options):
         A=I(nx,ny)+nuDx*Bx(nx,ny)+nuDy*By(nx,ny)
     elif advection:
         A=I(nx,ny)+nuAx*Cx(nx,ny,schema_advx)+nuAy*Cy(nx,ny,schema_advy)
-    elif test:
-        A=I(nx,ny)+s1*nuAx/dx*H11(nx,ny)+s2*nuAy/dy*H22(nx,ny)+(2*nuAx/dx+s1*nuAy/dy)*H12(nx,ny)
+    elif dif_autre:
+        A=I(nx,ny)+nuH1*H11(nx,ny)+nuH2*H22(nx,ny)+nuHcrois*H12(nx,ny)
 
     #on implémente le schéma d'euler
     for n in range(1,nt):
