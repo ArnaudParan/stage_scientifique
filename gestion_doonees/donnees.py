@@ -1,7 +1,12 @@
 #!/usr/bin/python3.4
 #-*-coding:utf-8-*
 
-#dans ce fichier, on code la gestion de data-lanzoni, on met les données dans un tableau représentant les mailles et un autre représentant la connectivité
+##
+# @file
+# @brief la prise des données de data_lanzoni.dat
+# @author Arnaud Paran
+# @version 0.1
+# @date 7 mai 2015
 
 import numpy as np
 import pylab as pl
@@ -10,6 +15,10 @@ from matplotlib import collections  as mc
 
 from os import chdir
 
+##
+# @brief lit une ligne de points du fichier de données
+# @param fichier le fichier dont on lit les données
+# @return un tableau de float représentant le point
 def lit_ligne_pts(fichier):
         ligne=fichier.readline().split()
         retour=[]
@@ -17,6 +26,10 @@ def lit_ligne_pts(fichier):
                 retour.append(float(donnee))
         return retour
 
+##
+# @brief lit une ligne de la matrice de connectivité dans le .dat
+# @param fichier le fichier dont on lit les données
+# @return un tableau d'int représentant les indices des points du simplex
 def lit_ligne_connect(fichier):
         ligne=fichier.readline().split()
         retour=[]
