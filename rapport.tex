@@ -8,6 +8,14 @@
 \author{Arnaud Paran}
 
 \begin{document}
+\makeatletter
+\newcommand*{\bdiv}{%
+  \nonscript\mskip-\medmuskip\mkern5mu%
+  \mathbin{\operator@font div}\penalty900\mkern5mu%
+  \nonscript\mskip-\medmuskip
+}
+\makeatother
+  
 
   \maketitle
 
@@ -50,7 +58,7 @@
   On remarque que si $\phi\beta_*\underline s\underline{\nabla}(div(\underline{u}))\geq0$ ou
   $\phi\beta_*\underline s\underline{\nabla}(div(\underline{u}))\geq0$, nos solutions divergent. D'autre part, si on obtient
   une solution non divergente, il faudra aussi contrôler le rapport
-  $\Delta t\leq\frac\phi{\beta_*|\underline\nabla(div(\underline u))|}$
+  $\Delta t\leq\frac\phi{\beta_*|\underline\nabla(div(\underline u))|}$							
   \subsubsection{Terme d'advection}
   On a aussi un terme d'advection
   \[-div(\underline{u})\beta_*\underline\nabla(\psi)\]
@@ -69,5 +77,89 @@
   \[-\beta_*^t\underline{\underline\nabla}\underline u.\underline\nabla \psi-\beta_*^t\underline{\underline\nabla}(\underline\nabla \psi).\underline u\]
   Or, par symétrie de la Hessienne, on a
   \[-\beta_*^t\underline{\underline\nabla}\underline u.\underline\nabla \psi-\beta_*\underline{\underline\nabla}(\underline\nabla \psi).\underline u\]
-
+  \section{Le rapport}
+  \begin{abstract}
+   Ce travail consiste en l'étude numérique du transport de sédiments dans un canal rectiligne. Nous avons utilisé un cas test et nous
+   l'avons post traité afin de vérifier les équations de saint venant et d'Exner. Les scripts ont été codés en python à partir de
+   données issue de Telemac sur le cas de Lanzoni.
+  \end{abstract}
+  \section{Notations}
+  $x$ : abscisse dans le canal
+  $y$ : ordonnée dans le canal
+  $z$ : hauteur du fond du canal
+  $h$ : hauteur d'eau
+  $u$ : vitesse selon x de l'eau
+  $v$ : vitesse selon y de l'eau
+  $g$ : accélération de la pesanteur
+  $K$ : 
+  $\underline u$ : la vitesse vectorielle de l'eau
+  \section{Introduction}
+  Le transport de sédiments est un domaine de grande importance. En effet, prévoir correctement le niveau du fond des rivières permet
+  d'optimiser les opérations code dragages qui sont très coûteuses.
+  
+  \section{Modèle}
+  Nous modélisons le fleuve comme un canal rectiligne de longueur 120m et de largeur 1,5m
+  
+  Ce canal suit les équations de Saint Venant, c'est à dire:
+  \begin{equation}
+    \frac{\partial \underline u}{\partial t}+\bdiv(h\underline u)
+  \end{equation}
+  \begin{equation}
+    \frac{\partial h\underline u}{\partial t}+\bdiv(h\underline u \otimes \underline u)+\nabla(\frac 1 2 gh^2)+gh(\underline S_0 + \underline S_f)=0
+  \end{equation}
+  
+  Ici, $\underline S_0$ est la pente du lit de la rivière et $\underline S_f$ le frottement.
+  la pente s'exprime par
+  \begin{equation}
+   \underline S_0 = \bdiv z
+  \end{equation}
+  \begin{equation}
+    \underline S_{fx}=\frac{u^2+v^2}{K^2h^{\frac 4 3}}u
+  \end{equation}
+  \begin{equation}
+    \underline S_{fy}=\frac{u^2+v^2}{K^2h^{\frac 4 3}}v
+  \end{equation}
+  \section{Vérification de la stationnarité}
+  Nous avons tenté de vérifier que les résultats issus de Télémac vérifiaient les équations de Saint Venant.
+  Pour ce faire, nous avons chargé les données dans un tableau python. Ensuite, nous avons calculé les gradients des fonctions
+  formes sur chaque simplex avec de formules simples obtenues géométriquement en considérant la hauteur du simplex.
+  Les indices représentent le point du simplex
+  \begin{equation}
+    g_1=\frac{(y_3-y_2) \underline e_x + (x_2-x_3) \underline e_y}{(x_2-x_3)*(y_1-y_3)-(x_1-x_3)*(y_2-y_3)}
+  \end{equation}
+  \begin{equation}
+    g_2=\frac{(y_3-y_1) \underline e_x + (x_1-x_3) \underline e_y}{(x_1-x_3)*(y_2-y_3)-(x_2-x_3)*(y_1-y_3)}
+  \end{equation}
+  \begin{equation}
+    g_3=\frac{(y_1-y_2) \underline e_x + (x_2-x_1) \underline e_y}{(x_2-x_1)*(y_3-y_1)-(x_3-x_1)*(y_2-y_1)}
+  \end{equation}
+  
+  Cela nous a permis donc de considérer la dérivation des grandeurs physiques du problème.
+  
+  Sur les données de départ, à partir d'environ 60 mètres en partant de l'amont, la vitesse de l'eau dans le canal
+  semble ``stationnaire''. Nous avons donc décidé de nous restreindre à cette partie du canal afin d'annuler les dérivées
+  temporelles dans nos calculs. Nous n'aurions pas pu considérer de telles dérivées car les données analysées étaient fournies à
+  un instant donné, donc sans dépendance au temps.
+  La restriction à une partie du canal a été simplement faite en ne chargeant en mémoire que les simplex se trouvant à plus de
+  60 mètres de l'amont. La matrice de connectivité représentant les simplex a du être changée aussi car n'ayant chargé que les
+  points à plus de 60 mètres, il a fallu changer l'indice des lignes.
+  
+  Nous nous sommes alors attaqués à la première équation, la conservation de la matière.
+  Elle s'est réécrite
+  \begin{equation}
+    \underline u . \underline \nabla h + h\bdiv(\underline u) = 0
+  \end{equation}
+  Nous avons donc calculé les deux termes et les avons additionnés. Ensuite, nous les avons représentés graphiquement.
+  
+  Or, nous nous intéressons ici à des points relatifs à un simplex, on obtient donc plusieurs valeurs pour un point donné.
+  Il y a donc discontinuité du tracé qui devient difficile à lire. Afin de résoudre ce problème, nous avons moyenné sur
+  chaque point les différentes valeurs par simplex obtenues afin d'obtenir une unique valeur de la somme en chaque point.
+  
+  Nous avons trouvé des valeurs de l'ordre de 1000, ce qui est loin du 0 auquel nous nous attendions, cependant, ce que l'on voulait
+  c'était
+  \begin{equation}
+    \underline u . \underline \nabla h + h\bdiv(\underline u) \leq \frac{\varepsilon}{\Delta t}
+  \end{equation}
+  Or, le $\Delta t$ pris pour l'expérimentation était de l'ordre de $10^{-3}$
+  
 \end{document}
