@@ -15,6 +15,9 @@ import scipy as sp
 import math as Math
 from reg_lin import *
 
+g=9.81
+K=1.
+
 ##
 # @brief crée la moyenne d'un tableau
 # @param tab le tableau qu'on moyenne
@@ -36,6 +39,12 @@ def mult(l,x):
 	for i in range(len(x)):
 		produit.append(x[i]*l)
 	return produit
+
+def somme (x1,x2):
+        somme=x1
+        for cpt in range(len(somme)):
+                somme[cpt]+=x2[cpt]
+        return somme
 
 ##	
 # @brief additionne trois vecteurs
@@ -76,7 +85,7 @@ def fforme_eval(g,x0,y0,x,y):
 # @brief Renvoie les gradients des fonctions forme des points du simplex
 # @param points matrice des points qui vient de donnees.py
 # @param connectivite matrice de connectivite qui vient de donnees.py
-# @param i nous dit la ligne de la matrice de connectivité à lire
+# @param i nous dit la ligne de la matrice de connectivité à lire soit l'indice du simplex
 # @return une matrice contenant les gradients
 def fforme_gradient(points,connectivite,i):
 	#les abscisses et coordonnées des points
@@ -109,7 +118,7 @@ def fforme_gradient(points,connectivite,i):
 # on calcule la somme des gradients sur chaque simplex et on en prend la norme infinie, sachant que cette somme doit être nulle
 def verif_gradient(points, connectivite):
 	erreur=0.
-	for i in range(13884):
+	for i in range(len(connectivite)):
 		gradients=fforme_gradient(points,connectivite,i)
 		g1=gradients[0]
 		g2=gradients[1]
@@ -158,7 +167,7 @@ def div_equa_masse(points, connectivite,i):
 			#dérivée par rapport à y
 			div[l]+=h[k]*v[l]*g[k][1]+h[l]*v[k]*g[k][1]
 			#on divise par la moyenne des h
-			#div[l]*=1./H
+			div[l]*=1./H
         return div;
 
 ##
@@ -167,23 +176,23 @@ def div_equa_masse(points, connectivite,i):
 # @param connectivite la matrice de connectivité définie dans donneer.py
 def trace_stationnaire(points, connectivite):
         div=[]
-        for point in range(7500):
+        for point in range(len(points)):
                 div.append([])
         ax=a3.Axes3D(pl.figure())
         ax.set_xlim3d(0,120)
         ax.set_ylim3d(-5,5)
-        ax.set_zlim3d(0.3,1)
+        ax.set_zlim3d(0.3,10000)
 	#ajout des termes
-	for simplex in range(13884):
+	for simplex in range(len(connectivite)):
                 div_elem=div_equa_masse(points,connectivite,simplex)
 		div[connectivite[simplex][0]].append(div_elem[0])
 		div[connectivite[simplex][1]].append(div_elem[1])
 		div[connectivite[simplex][2]].append(div_elem[2])
 	#moyennage
-        for point in range(7500):
+        for point in range(len(points)):
 		div[point]=moy(div[point])
 	#affichage
-	for simplex in range(13884):
+	for simplex in range(len(connectivite)):
                 sommets=[]
                 sommets.append([points[connectivite[simplex][0]][0],points[connectivite[simplex][0]][1],div[connectivite[simplex][0]]])
                 sommets.append([points[connectivite[simplex][1]][0],points[connectivite[simplex][1]][1],div[connectivite[simplex][1]]])
@@ -201,7 +210,7 @@ def trace_stationnaire(points, connectivite):
 # @return renvoie l'erreur
 def equa_masse(points,connectivite):
 	erreur=0.
-	for i in range(13884):
+	for i in range(len(connectivite)):
 		erreur=max([erreur,norminf(div_equa_masse(points,connectivite,i))])
 	return erreur
 
@@ -212,7 +221,7 @@ def lieu_stat(points,connectivite):
 	vals=[20,40,60,80,100]
 	Mm=[[M,m],[M,m],[M,m],[M,m],[M,m]]
 	for j in range(len(vals)):
-		for i in range(13884):
+		for i in range(len(connectivite)):
 			if points[connectivite[i][0]][0]<vals[j]:
 				m=min([m]+div_equa_masse(points,connectivite,i))
 			if points[connectivite[i][0]][0]>vals[len(vals)-j-1]:
@@ -251,10 +260,12 @@ def moments(points, connectivite,i):
 	#la coordonnée selon la iè fonction forme
 	for l in range(3):
                 S0=[0.,0.]
-                Sf=[u[l]*Math.sqrt((u[l]**2)+(v[l]**2))/(h[l]**(4/3)),v[l]*Math.sqrt((u[l]**2)+(v[l]**2))/(h[l]**(4/3))]
+                Sf=[u[l]*Math.sqrt((u[l]**2)+(v[l]**2))/(h[l]**(4./3.)),v[l]*Math.sqrt((u[l]**2)+(v[l]**2))/(h[l]**(4./3.))]
 		for k in range(3):
                         S0[0]+=z[k]*g[k][0]
                         S0[1]+=z[k]*g[k][1]
+                        #S0[0]+=(z[k]+h[k])*g[k][0]
+                        #S0[1]+=(z[k]+h[k])*g[k][1]
                 div[l]=[S0,Sf]
         return div;
 
@@ -263,36 +274,197 @@ def reg_moments(points, connectivite):
         y1=[]
         x2=[]
         y2=[]
-        for point in range(7500):
+        for point in range(len(points)):
                 x1.append([])
                 y1.append([])
                 x2.append([])
                 y2.append([])
 	#ajout des termes
-	for simplex in range(13884):
+        C=calc_C(points,connectivite)
+        vgv=calcule_v_grad_v(points,connectivite)
+	for simplex in range(len(connectivite)):
                 div_elem=moments(points,connectivite,simplex)
-		y1[connectivite[simplex][0]].append(div_elem[0][0][0])
-		y1[connectivite[simplex][1]].append(div_elem[1][0][0])
-		y1[connectivite[simplex][2]].append(div_elem[2][0][0])
+		y1[connectivite[simplex][0]].append(-div_elem[0][0][0]+C[simplex][0][0]+vgv[simplex][0][0])
+		y1[connectivite[simplex][1]].append(-div_elem[1][0][0]+C[simplex][1][0]+vgv[simplex][1][0])
+		y1[connectivite[simplex][2]].append(-div_elem[2][0][0]+C[simplex][2][0]+vgv[simplex][2][0])
 		x1[connectivite[simplex][0]].append(div_elem[0][1][0])
 		x1[connectivite[simplex][1]].append(div_elem[1][1][0])
 		x1[connectivite[simplex][2]].append(div_elem[2][1][0])
 
-		y2[connectivite[simplex][0]].append(div_elem[0][0][1])
-		y2[connectivite[simplex][1]].append(div_elem[1][0][1])
-		y2[connectivite[simplex][2]].append(div_elem[2][0][1])
+		y2[connectivite[simplex][0]].append(-div_elem[0][0][1]+C[simplex][0][1]+vgv[simplex][0][1])
+		y2[connectivite[simplex][1]].append(-div_elem[1][0][1]+C[simplex][1][1]+vgv[simplex][1][1])
+		y2[connectivite[simplex][2]].append(-div_elem[2][0][1]+C[simplex][2][1]+vgv[simplex][2][1])
 		x2[connectivite[simplex][0]].append(div_elem[0][1][1])
 		x2[connectivite[simplex][1]].append(div_elem[1][1][1])
 		x2[connectivite[simplex][2]].append(div_elem[2][1][1])
 	#moyennage
-        for point in range(7500):
+        for point in range(len(points)):
 		x1[point]=moy(x1[point])
 		y1[point]=moy(y1[point])
 		x2[point]=moy(x2[point])
 		y2[point]=moy(y2[point])
         print("selon x")
-        reg1D(x1,y1)
+        regx=reg1D(x1,y1)[1]
+        if regx < 0 :
+                print("Erreur de signe")
+        else :
+                print("K="+str(Math.sqrt(1./regx)))
         print("selon y")
-        reg1D(x2,y2)
+        regy=reg1D(x2,y2)[1]
+        if regy < 0 :
+                print("Erreur de signe")
+        else :
+                print("K="+str(Math.sqrt(1./regy)))
         print("selon x et y")
-        reg1D(x1+x2,y1+y2)
+        regxpy=reg1D(x1+x2,y1+y2)[1]
+        if regxpy<0:
+                print("Erreur de signe")
+        else:
+                print("K="+str(Math.sqrt(1./regxpy)))
+
+##
+# @brief renvoie la matrice gradient de la vitesse du point pt du simplex
+# @param points la matrice de points définie dans donnees.py
+# @param connectivite la matrice de connectivité définie dans donneer.py
+# @param simplex le simplex considéré
+# @param pt le point du simplex (entre 0 et 2)
+# @return renvoie la matrice gradient de la vitesse
+def grad_vitesse(points, connectivite, simplex):
+        gradient=[[0.,0.],[0.,0.]]
+        grad_fforme=fforme_gradient(points,connectivite,simplex)
+	#vitesse u
+	u=[points[connectivite[simplex][0]][2]]
+	u.append(points[connectivite[simplex][1]][2])
+	u.append(points[connectivite[simplex][2]][2])
+	#vitesse v
+	v=[points[connectivite[simplex][0]][3]]
+	v.append(points[connectivite[simplex][1]][3])
+	v.append(points[connectivite[simplex][2]][3])
+        for cpt_point in range(3):
+                #du/dx
+                gradient[0][0]+=u[cpt_point]*grad_fforme[cpt_point][0]
+                #du/dy
+                gradient[0][1]+=u[cpt_point]*grad_fforme[cpt_point][1]
+                #dv/dx
+                gradient[1][0]+=v[cpt_point]*grad_fforme[cpt_point][0]
+                #dv/dy
+                gradient[1][1]+=v[cpt_point]*grad_fforme[cpt_point][1]
+        return csr_matrix(gradient)
+
+def calcule_v_grad_v(points,connectivite):
+        v_grad_v=[]
+        for simplex in range(len(connectivite)):
+                G=grad_vitesse(points,connectivite,simplex)
+                V1=[points[connectivite[simplex][0]][2],points[connectivite[simplex][0]][3]]
+                V2=[points[connectivite[simplex][1]][2],points[connectivite[simplex][1]][3]]
+                V3=[points[connectivite[simplex][2]][2],points[connectivite[simplex][2]][3]]
+                v_grad_v.append([G.dot(V1),G.dot(V2),G.dot(V3)])
+        return v_grad_v
+
+def calcule_h_v_grad_v(points,connectivite):
+        hvgv=calcule_v_grad_v(points,connectivite)
+        for simplex in range(len(connectivite)):
+                hvgv[simplex][0]*=points[connectivite[simplex][0]][4]
+                hvgv[simplex][1]*=points[connectivite[simplex][1]][4]
+                hvgv[simplex][2]*=points[connectivite[simplex][2]][4]
+        return hvgv
+
+def gradh(points,connectivite,simplex):
+        gradient=[0.,0.]
+        grad_fforme=fforme_gradient(points,connectivite,simplex)
+	#h
+	h=[points[connectivite[simplex][0]][4]]
+	h.append(points[connectivite[simplex][1]][4])
+	h.append(points[connectivite[simplex][2]][4])
+        for cpt_point in range(3):
+                gradient[0]+=h[cpt_point]*grad_fforme[cpt_point][0]
+                gradient[1]+=h[cpt_point]*grad_fforme[cpt_point][1]
+        return gradient
+
+def calc_Ci(points,connectivite,simplex):
+        G=gradh(points,connectivite,simplex)
+        h=[points[connectivite[simplex][0]][4]]
+        h.append(points[connectivite[simplex][1]][4])
+        h.append(points[connectivite[simplex][2]][4])
+        return [mult(h[0]*g,G),mult(h[1]*g,G),mult(h[2]*g,G)]
+
+def calc_C(points,connectivite):
+        C=[]
+        for simplex in range(len(connectivite)):
+                C.append(calc_Ci(points,connectivite,simplex))
+        return C
+
+def calc_Di(points,connectivite,simplex):
+        moment=moments(points,connectivite,simplex)
+        S0=[moment[0][0],moment[1][0],moment[2][0]]
+        Sf=[mult(1./K**2,moment[0][1]),mult(1./K**2,moment[1][1]),mult(1./K**2,moment[2][1])]
+        S0Sf= [somme(S0[0],Sf[0]),somme(S0[1],Sf[1]),somme(S0[2],Sf[2])]
+        for i in range(len(S0Sf)):
+                mult(g*points[connectivite[simplex][i]][4],S0Sf[i])
+        return S0Sf
+
+def calcule_h_v_grad_vi(points,connectivite,simplex):
+        G=grad_vitesse(points,connectivite,simplex)
+        V1=[points[connectivite[simplex][0]][2],points[connectivite[simplex][0]][3]]
+        V2=[points[connectivite[simplex][1]][2],points[connectivite[simplex][1]][3]]
+        V3=[points[connectivite[simplex][2]][2],points[connectivite[simplex][2]][3]]
+        hvgv = [G.dot(V1),G.dot(V2),G.dot(V3)]
+        hvgv[0]*=points[connectivite[simplex][0]][4]
+        hvgv[1]*=points[connectivite[simplex][1]][4]
+        hvgv[2]*=points[connectivite[simplex][2]][4]
+        return hvgv
+
+def exe(points,connectivite):
+        A=[]
+        M=0.
+        for i in range(len(connectivite)):
+                c=calc_Ci(points,connectivite,i)
+                d=calc_Di(points,connectivite,i)
+                hvgv=calcule_h_v_grad_vi(points,connectivite,i)
+                A.append(somme(d[0],hvgv[0]))
+                A.append(somme(d[1],hvgv[1]))
+                A.append(somme(d[2],hvgv[2]))
+        for i in range(len(A)):
+                M=max([M]+A[i])
+        return M
+
+def distrib_reg_moments(points, connectivite):
+        x1=[]
+        y1=[]
+        x2=[]
+        y2=[]
+        for point in range(len(points)):
+                x1.append([])
+                y1.append([])
+                x2.append([])
+                y2.append([])
+	#ajout des termes
+        C=calc_C(points,connectivite)
+        vgv=calcule_h_v_grad_v(points,connectivite)
+	for simplex in range(len(connectivite)):
+                div_elem=moments(points,connectivite,simplex)
+		y1[connectivite[simplex][0]].append(-div_elem[0][0][0]+C[simplex][0][0])
+		y1[connectivite[simplex][1]].append(-div_elem[1][0][0]+C[simplex][1][0])
+		y1[connectivite[simplex][2]].append(-div_elem[2][0][0]+C[simplex][2][0])
+		x1[connectivite[simplex][0]].append(div_elem[0][1][0])
+		x1[connectivite[simplex][1]].append(div_elem[1][1][0])
+		x1[connectivite[simplex][2]].append(div_elem[2][1][0])
+
+		y2[connectivite[simplex][0]].append(-div_elem[0][0][1]+C[simplex][0][1])
+		y2[connectivite[simplex][1]].append(-div_elem[1][0][1]+C[simplex][1][1])
+		y2[connectivite[simplex][2]].append(-div_elem[2][0][1]+C[simplex][2][1])
+		x2[connectivite[simplex][0]].append(div_elem[0][1][1])
+		x2[connectivite[simplex][1]].append(div_elem[1][1][1])
+		x2[connectivite[simplex][2]].append(div_elem[2][1][1])
+	#moyennage
+        for point in range(len(points)):
+		x1[point]=moy(x1[point])
+		y1[point]=moy(y1[point])
+		x2[point]=moy(x2[point])
+		y2[point]=moy(y2[point])
+        print("x")
+        distrib_reg1D(x1,y1)
+        print("y")
+        distrib_reg1D(x2,y2)
+        print("x+y")
+        distrib_reg1D(x1+x2,y1+y2)

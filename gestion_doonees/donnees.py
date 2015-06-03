@@ -50,16 +50,33 @@ for i in range(14):
 points=[]
 connectivite=[]
 segments=[]
+corresp=[]
 
+#début de la zone qu'on considère
+L=60
+
+point=0
 for i in range(7500):
-        points.append(lit_ligne_pts(Fdata))
+	ligne=lit_ligne_pts(Fdata)
+	if ligne[0]>=L:
+		points.append(ligne)
+		corresp.append(point)
+		point=point+1
+	else:
+		corresp.append(-1)
+
 
 #lit la connectivité
 for i in range(13884):
-        connectivite.append(lit_ligne_connect(Fdata))
-        segments.append([(points[connectivite[i][0]][0],points[connectivite[i][0]][1]),(points[connectivite[i][1]][0],points[connectivite[i][1]][1])])
-        segments.append([(points[connectivite[i][1]][0],points[connectivite[i][1]][1]),(points[connectivite[i][2]][0],points[connectivite[i][2]][1])])
-        segments.append([(points[connectivite[i][2]][0],points[connectivite[i][2]][1]),(points[connectivite[i][0]][0],points[connectivite[i][0]][1])])
+	ligne=lit_ligne_connect(Fdata)
+	ligne[0]=corresp[ligne[0]]
+	ligne[1]=corresp[ligne[1]]
+	ligne[2]=corresp[ligne[2]]
+	if ligne[0]!=-1 and ligne[1]!=-1 and ligne[2]!=-1:
+		connectivite.append(ligne)
+		segments.append([(points[ligne[0]][0],points[ligne[0]][1]),(points[ligne[1]][0],points[ligne[1]][1])])
+		segments.append([(points[ligne[1]][0],points[ligne[1]][1]),(points[ligne[2]][0],points[ligne[2]][1])])
+		segments.append([(points[ligne[2]][0],points[ligne[2]][1]),(points[ligne[0]][0],points[ligne[0]][1])])
 
 Fdata.close()
 
