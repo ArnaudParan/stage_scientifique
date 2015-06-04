@@ -70,6 +70,8 @@ def norminf (x) :
 	inf = min (x)
 	return max ([abs (sup), abs (inf)])
 
+##################################################### Traitement des fonctions forme
+
 ##
 # @brief evalue une fonction forme en un point
 # @param gradient le gradient de la fonction
@@ -126,6 +128,27 @@ def verif_gradient (matrice_points, matrice_connectivite) :
 		erreur = max ([erreur, norminf (add (g1, g2, g3))])
 	return erreur
 
+##################################################
+
+#Obsolète depuis qu'on a commencé à trier les simplex dès la prise de données, si vous voulez voir ce que faisait
+#cette fonction, mettez tous les simplex dans la mémoire
+def lieu_stat (matrice_points, matrice_connectivite) :
+	m = 1.
+	M = 0.
+	vals = [20, 40, 60, 80, 100]
+	Mm = [[M, m], [M, m], [M, m], [M, m], [M, m]]
+	for j in range (len (vals)) :
+		for i in range (len (matrice_connectivite)) :
+			if matrice_points [matrice_connectivite[i][0]] [0] < vals[j] :
+				m = min ([m] + div_equa_masse (matrice_points, matrice_connectivite, i))
+			if matrice_points [matrice_connectivite[i][0]] [0] > vals[len(vals)-j-1] :
+				M = max ([M] + div_equa_masse (matrice_points, matrice_connectivite, i))
+		Mm[j][1] = m
+		Mm[len (vals) - j - 1][0] = M
+	return Mm
+
+################################################### Calculs des termes par simplex
+
 ##
 # @brief vérifie l'équation de la conservation de la masse sur un simplex
 # @param matrice_points la matrice de matrice_points définie dans donnees.py
@@ -171,6 +194,120 @@ def div_equa_masse (matrice_points, matrice_connectivite, simplex) :
         return div;
 
 ##
+# @brief renvoie la matrice gradient de la vitesse du point pt du simplex
+# @param matrice_points la matrice de matrice_points définie dans donnees.py
+# @param matrice_connectivite la matrice de connectivité définie dans donneer.py
+# @param simplex le simplex considéré
+# @param pt le point du simplex (entre 0 et 2)
+# @return renvoie la matrice gradient de la vitesse
+def grad_vitesse (matrice_points, matrice_connectivite, simplex) :
+        gradient = [[0., 0.], [0., 0.]]
+        grad_fforme = fforme_gradient (matrice_points, matrice_connectivite, simplex)
+
+        ligne_point = [ matrice_connectivite[simplex][0],
+                        matrice_connectivite[simplex][1],
+                        matrice_connectivite[simplex][2]]
+	#vitesse u
+	u = [   matrice_points [ligne_point[0]] [2],
+                matrice_points [ligne_point[1]] [2],
+                matrice_points [ligne_point[2]] [2]]
+	#vitesse v
+	v = [   matrice_points [ligne_point[0]] [3],
+                matrice_points [ligne_point[0]] [3],
+                matrice_points [ligne_point[0]] [3]]
+        for cpt_point in range (3) :
+                #du/dx
+                gradient[0][0] += u[cpt_point] * grad_fforme[cpt_point][0]
+                #du/dy
+                gradient[0][1] += u[cpt_point] * grad_fforme[cpt_point][1]
+                #dv/dx
+                gradient[1][0] += v[cpt_point] * grad_fforme[cpt_point][0]
+                #dv/dy
+                gradient[1][1] += v[cpt_point] * grad_fforme[cpt_point][1]
+        return csr_matrix (gradient)
+
+def calcule_v_grad_vi (matrice_points, matrice_connectivite, simplex) :
+        G = grad_vitesse (matrice_points, matrice_connectivite, simplex)
+        ligne_point = [         matrice_connectivite[simplex][0],
+                                matrice_connectivite[simplex][1],
+                                matrice_connectivite[simplex][2]]
+        V1 = [matrice_points [ligne_point[0]] [2], matrice_points [ligne_point[0]] [3]]
+        V2 = [matrice_points [ligne_point[1]] [2], matrice_points [ligne_point[1]] [3]]
+        V3 = [matrice_points [ligne_point[2]] [2], matrice_points [ligne_point[2]] [3]]
+        return [G.dot (V1), G.dot (V2), G.dot (V3)]
+
+def gradh (matrice_points, matrice_connectivite, simplex) :
+        gradient = [0., 0.]
+        grad_fforme = fforme_gradient (matrice_points, matrice_connectivite, simplex)
+        ligne_point = [         matrice_connectivite[simplex][0],
+                                matrice_connectivite[simplex][1],
+                                matrice_connectivite[simplex][2]]
+	#h
+        h = [   matrice_points [ligne_point[0]] [4],
+                matrice_points [ligne_point[0]] [4],
+                matrice_points [ligne_point[0]] [4]]
+        for cpt_point in range (3) :
+                gradient[0] += h[cpt_point] * grad_fforme[cpt_point][0]
+                gradient[1] += h[cpt_point] * grad_fforme[cpt_point][1]
+        return gradient
+
+def calc_g_grad_hi (matrice_points, matrice_connectivite, simplex) :
+        G = gradh (matrice_points, matrice_connectivite, simplex)
+        ligne_point = [         matrice_connectivite[simplex][0],
+                                matrice_connectivite[simplex][1],
+                                matrice_connectivite[simplex][2]]
+        h = [   matrice_points [ligne_point[0]] [4],
+                matrice_points [ligne_point[0]] [4],
+                matrice_points [ligne_point[0]] [4]]
+        return [mult (h[0] * g, G), mult (h[1] * g, G), mult(h[2] * g, G)]
+
+def calc_g_S0Sfi(matrice_points,matrice_connectivite,simplex) :
+        moment = moments (matrice_points, matrice_connectivite, simplex)
+        S0 = [moment[0][0], moment[1][0], moment[2][0]]
+        Sf = [mult (1. / K ** 2, moment[0][1]), mult (1. / K ** 2, moment[1][1]), mult (1. / K ** 2, moment[2][1])]
+        S0Sf = [somme (S0[0], Sf[0]),somme (S0[1], Sf[1]), somme (S0[2], Sf[2])]
+        for point in range (len (S0Sf)) :
+                mult (g, S0Sf[point])
+        return S0Sf
+
+def calcule_h_v_grad_vi(matrice_points, matrice_connectivite, simplex) :
+        hvgv = calcule_v_grad_vi (matrice_points, matrice_connectivite, simplex)
+        ligne_point = [         matrice_connectivite[simplex][0],
+                                matrice_connectivite[simplex][1],
+                                matrice_connectivite[simplex][2]]
+        h = [   matrice_points [ligne_point[0]] [4],
+                matrice_points [ligne_point[1]] [4],
+                matrice_points [ligne_point[2]] [4]]
+        hvgv[0] *= h[0]
+        hvgv[1] *= h[1]
+        hvgv[2] *= h[2]
+        return hvgv
+
+####################################### Calcul des termes sur tout l'espace
+
+def calc_g_grad_h(matrice_points,matrice_connectivite) :
+        C = []
+        for simplex in range (len (matrice_connectivite)) :
+                C.append (calc_g_grad_hi (matrice_points, matrice_connectivite, simplex))
+        return C
+
+def calcule_v_grad_v (matrice_points, matrice_connectivite) :
+        v_grad_v = []
+        for simplex in range (len (matrice_connectivite)) :
+                v_grad_v.append (calcule_v_grad_vi (matrice_points, matrice_connectivite, simplex))
+        return v_grad_v
+
+def calcule_h_v_grad_v (matrice_points, matrice_connectivite) :
+        hvgv = calcule_v_grad_v (matrice_points, matrice_connectivite)
+        for simplex in range (len (matrice_connectivite)) :
+                hvgv[simplex][0] *= matrice_points [matrice_connectivite[simplex][0]] [4]
+                hvgv[simplex][1] *= matrice_points [matrice_connectivite[simplex][1]] [4]
+                hvgv[simplex][2] *= matrice_points [matrice_connectivite[simplex][2]] [4]
+        return hvgv
+
+################################ Traitement des calculs et affichage des résultats
+
+##
 # @brief trace un graphe montrant si la solution est stationnaire
 # @param matrice_points la matrice de matrice_points définie dans donnees.py
 # @param matrice_connectivite la matrice de connectivité définie dans donneer.py
@@ -213,23 +350,6 @@ def equa_masse (matrice_points, matrice_connectivite) :
 	for i in range (len (matrice_connectivite)) :
 		erreur = max ([erreur, norminf (div_equa_masse (matrice_points, matrice_connectivite, i))])
 	return erreur
-
-#Remarque, obsolète depuis qu'on a commencé à trier les simplex dès la prise de données, si vous voulez voir ce que faisait
-#cette fonction, mettez tous les simplex dans la mémoire
-def lieu_stat (matrice_points, matrice_connectivite) :
-	m = 1.
-	M = 0.
-	vals = [20, 40, 60, 80, 100]
-	Mm = [[M, m], [M, m], [M, m], [M, m], [M, m]]
-	for j in range (len (vals)) :
-		for i in range (len (matrice_connectivite)) :
-			if matrice_points [matrice_connectivite[i][0]] [0] < vals[j] :
-				m = min ([m] + div_equa_masse (matrice_points, matrice_connectivite, i))
-			if matrice_points [matrice_connectivite[i][0]] [0] > vals[len(vals)-j-1] :
-				M = max ([M] + div_equa_masse (matrice_points, matrice_connectivite, i))
-		Mm[j][1] = m
-		Mm[len (vals) - j - 1][0] = M
-	return Mm
 
 def moments (matrice_points, matrice_connectivite, simplex) :
         ligne_point = [ matrice_connectivite[simplex][0],
@@ -326,116 +446,6 @@ def reg_moments (matrice_points, matrice_connectivite) :
                 print("Erreur de signe")
         else :
                 print("K="+str(Math.sqrt(1./regxpy)))
-
-##
-# @brief renvoie la matrice gradient de la vitesse du point pt du simplex
-# @param matrice_points la matrice de matrice_points définie dans donnees.py
-# @param matrice_connectivite la matrice de connectivité définie dans donneer.py
-# @param simplex le simplex considéré
-# @param pt le point du simplex (entre 0 et 2)
-# @return renvoie la matrice gradient de la vitesse
-def grad_vitesse (matrice_points, matrice_connectivite, simplex) :
-        gradient = [[0., 0.], [0., 0.]]
-        grad_fforme = fforme_gradient (matrice_points, matrice_connectivite, simplex)
-
-        ligne_point = [ matrice_connectivite[simplex][0],
-                        matrice_connectivite[simplex][1],
-                        matrice_connectivite[simplex][2]]
-	#vitesse u
-	u = [   matrice_points [ligne_point[0]] [2],
-                matrice_points [ligne_point[1]] [2],
-                matrice_points [ligne_point[2]] [2]]
-	#vitesse v
-	v = [   matrice_points [ligne_point[0]] [3],
-                matrice_points [ligne_point[0]] [3],
-                matrice_points [ligne_point[0]] [3]]
-        for cpt_point in range (3) :
-                #du/dx
-                gradient[0][0] += u[cpt_point] * grad_fforme[cpt_point][0]
-                #du/dy
-                gradient[0][1] += u[cpt_point] * grad_fforme[cpt_point][1]
-                #dv/dx
-                gradient[1][0] += v[cpt_point] * grad_fforme[cpt_point][0]
-                #dv/dy
-                gradient[1][1] += v[cpt_point] * grad_fforme[cpt_point][1]
-        return csr_matrix (gradient)
-
-def calcule_v_grad_vi (matrice_points, matrice_connectivite, simplex) :
-        G = grad_vitesse (matrice_points, matrice_connectivite, simplex)
-        ligne_point = [         matrice_connectivite[simplex][0],
-                                matrice_connectivite[simplex][1],
-                                matrice_connectivite[simplex][2]]
-        V1 = [matrice_points [ligne_point[0]] [2], matrice_points [ligne_point[0]] [3]]
-        V2 = [matrice_points [ligne_point[1]] [2], matrice_points [ligne_point[1]] [3]]
-        V3 = [matrice_points [ligne_point[2]] [2], matrice_points [ligne_point[2]] [3]]
-        return [G.dot (V1), G.dot (V2), G.dot (V3)]
-
-def calcule_v_grad_v (matrice_points, matrice_connectivite) :
-        v_grad_v = []
-        for simplex in range (len (matrice_connectivite)) :
-                v_grad_v.append (calcule_v_grad_vi (matrice_points, matrice_connectivite, simplex))
-        return v_grad_v
-
-def calcule_h_v_grad_v (matrice_points, matrice_connectivite) :
-        hvgv = calcule_v_grad_v (matrice_points, matrice_connectivite)
-        for simplex in range (len (matrice_connectivite)) :
-                hvgv[simplex][0] *= matrice_points [matrice_connectivite[simplex][0]] [4]
-                hvgv[simplex][1] *= matrice_points [matrice_connectivite[simplex][1]] [4]
-                hvgv[simplex][2] *= matrice_points [matrice_connectivite[simplex][2]] [4]
-        return hvgv
-
-def gradh (matrice_points, matrice_connectivite, simplex) :
-        gradient = [0., 0.]
-        grad_fforme = fforme_gradient (matrice_points, matrice_connectivite, simplex)
-        ligne_point = [         matrice_connectivite[simplex][0],
-                                matrice_connectivite[simplex][1],
-                                matrice_connectivite[simplex][2]]
-	#h
-        h = [   matrice_points [ligne_point[0]] [4],
-                matrice_points [ligne_point[0]] [4],
-                matrice_points [ligne_point[0]] [4]]
-        for cpt_point in range (3) :
-                gradient[0] += h[cpt_point] * grad_fforme[cpt_point][0]
-                gradient[1] += h[cpt_point] * grad_fforme[cpt_point][1]
-        return gradient
-
-def calc_g_grad_hi (matrice_points, matrice_connectivite, simplex) :
-        G = gradh (matrice_points, matrice_connectivite, simplex)
-        ligne_point = [         matrice_connectivite[simplex][0],
-                                matrice_connectivite[simplex][1],
-                                matrice_connectivite[simplex][2]]
-        h = [   matrice_points [ligne_point[0]] [4],
-                matrice_points [ligne_point[0]] [4],
-                matrice_points [ligne_point[0]] [4]]
-        return [mult (h[0] * g, G), mult (h[1] * g, G), mult(h[2] * g, G)]
-
-def calc_g_grad_h(matrice_points,matrice_connectivite) :
-        C = []
-        for simplex in range (len (matrice_connectivite)) :
-                C.append (calc_g_grad_hi (matrice_points, matrice_connectivite, simplex))
-        return C
-
-def calc_g_S0Sfi(matrice_points,matrice_connectivite,simplex) :
-        moment = moments (matrice_points, matrice_connectivite, simplex)
-        S0 = [moment[0][0], moment[1][0], moment[2][0]]
-        Sf = [mult (1. / K ** 2, moment[0][1]), mult (1. / K ** 2, moment[1][1]), mult (1. / K ** 2, moment[2][1])]
-        S0Sf = [somme (S0[0], Sf[0]),somme (S0[1], Sf[1]), somme (S0[2], Sf[2])]
-        for point in range (len (S0Sf)) :
-                mult (g, S0Sf[point])
-        return S0Sf
-
-def calcule_h_v_grad_vi(matrice_points, matrice_connectivite, simplex) :
-        hvgv = calcule_v_grad_vi (matrice_points, matrice_connectivite, simplex)
-        ligne_point = [         matrice_connectivite[simplex][0],
-                                matrice_connectivite[simplex][1],
-                                matrice_connectivite[simplex][2]]
-        h = [   matrice_points [ligne_point[0]] [4],
-                matrice_points [ligne_point[1]] [4],
-                matrice_points [ligne_point[2]] [4]]
-        hvgv[0] *= h[0]
-        hvgv[1] *= h[1]
-        hvgv[2] *= h[2]
-        return hvgv
 
 def exe (matrice_points, matrice_connectivite) :
         A = []
