@@ -16,7 +16,7 @@ from matplotlib import collections  as mc
 from os import chdir
 
 ##
-# @brief lit une ligne de points du fichier de données
+# @brief lit une ligne de matrice_points du fichier de données
 # @param fichier le fichier dont on lit les données
 # @return un tableau de float représentant le point
 def lit_ligne_pts(fichier):
@@ -29,7 +29,7 @@ def lit_ligne_pts(fichier):
 ##
 # @brief lit une ligne de la matrice de connectivité dans le .dat
 # @param fichier le fichier dont on lit les données
-# @return un tableau d'int représentant les indices des points du simplex
+# @return un tableau d'int représentant les indices des matrice_points du simplex
 def lit_ligne_connect(fichier):
         ligne=fichier.readline().split()
         retour=[]
@@ -42,13 +42,13 @@ chdir('/home/arnaud/Documents/stage_scientifique/gestion_doonees/')
 #Cet objet contien le fichier à ouvrir
 Fdata=open('data_lanzoni.dat','r')
 
-#positionne le curseur au début des points
+#positionne le curseur au début des matrice_points
 for i in range(14):
         Fdata.readline()
 
-#lit les points
-points=[]
-connectivite=[]
+#lit les matrice_points
+matrice_points=[]
+matrice_connectivite=[]
 segments=[]
 corresp=[]
 
@@ -59,7 +59,7 @@ point=0
 for i in range(7500):
 	ligne=lit_ligne_pts(Fdata)
 	if ligne[0]>=L:
-		points.append(ligne)
+		matrice_points.append(ligne)
 		corresp.append(point)
 		point=point+1
 	else:
@@ -73,18 +73,30 @@ for i in range(13884):
 	ligne[1]=corresp[ligne[1]]
 	ligne[2]=corresp[ligne[2]]
 	if ligne[0]!=-1 and ligne[1]!=-1 and ligne[2]!=-1:
-		connectivite.append(ligne)
-		segments.append([(points[ligne[0]][0],points[ligne[0]][1]),(points[ligne[1]][0],points[ligne[1]][1])])
-		segments.append([(points[ligne[1]][0],points[ligne[1]][1]),(points[ligne[2]][0],points[ligne[2]][1])])
-		segments.append([(points[ligne[2]][0],points[ligne[2]][1]),(points[ligne[0]][0],points[ligne[0]][1])])
+		matrice_connectivite.append(ligne)
+		segments.append([(matrice_points[ligne[0]][0],matrice_points[ligne[0]][1]),(matrice_points[ligne[1]][0],matrice_points[ligne[1]][1])])
+		segments.append([(matrice_points[ligne[1]][0],matrice_points[ligne[1]][1]),(matrice_points[ligne[2]][0],matrice_points[ligne[2]][1])])
+		segments.append([(matrice_points[ligne[2]][0],matrice_points[ligne[2]][1]),(matrice_points[ligne[0]][0],matrice_points[ligne[0]][1])])
 
-Fdata.close()
+#Fdata.close()
 
 
-lc = mc.LineCollection(segments, linewidths=1)
-fig, ax = pl.subplots()
-ax.add_collection(lc)
-ax.margins(0.1)
-ax.set_autoscaley_on(False)
-ax.set_ylim([-60,60])
-plt.show()
+#lc = mc.LineCollection(segments, linewidths=1)
+#fig, ax = pl.subplots()
+#ax.add_collection(lc)
+#ax.margins(0.1)
+#ax.set_autoscaley_on(False)
+#ax.set_ylim([-60,60])
+#plt.show()
+
+def u (simplex, point) :
+        return matrice_points [matrice_connectivite[simplex][point]] [2]
+
+def v (simplex, point) :
+        return matrice_points [matrice_connectivite[simplex][point]] [3]
+
+def h (simplex, point) :
+        return matrice_points [matrice_connectivite[simplex][point]] [4]
+
+def z (simplex, point) :
+        return matrice_points [matrice_connectivite[simplex][point]] [5]
