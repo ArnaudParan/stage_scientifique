@@ -1,6 +1,8 @@
 #!/usr/bin/python3.4
 #-*-coding:utf-8-*
 
+from donnees import *
+
 ##
 # @brief crée la moyenne d'un tableau
 # @param tab le tableau qu'on moyenne
@@ -11,6 +13,10 @@ def moy (tab) :
 	for elem in tab :
 		moyenne += elem / taille_tab
 	return moyenne
+
+def moy_par_point(vals_point_simplex) :
+        for point in range(len (matrice_points)) :
+		vals_point_simplex[point] = moy(vals_point_simplex[point])
 
 ##	
 # @brief multiplie un vecteur par un scalaire

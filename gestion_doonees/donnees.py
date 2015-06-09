@@ -89,6 +89,15 @@ for i in range(13884):
 #ax.set_ylim([-60,60])
 #plt.show()
 
+def ligne_point(simplex, point) :
+        return matrice_connectivite[simplex][point]
+
+def x (simplex, point) :
+        return matrice_points [matrice_connectivite[simplex][point]] [0]
+
+def y (simplex, point) :
+        return matrice_points [matrice_connectivite[simplex][point]] [1]
+
 def u (simplex, point) :
         return matrice_points [matrice_connectivite[simplex][point]] [2]
 

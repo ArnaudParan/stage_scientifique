@@ -31,10 +31,6 @@ def trace_stationnaire () :
         div = []
         for point in range (len (matrice_points)) :
                 div.append ([])
-        ax=a3.Axes3D (pl.figure ())
-        ax.set_xlim3d (0,120)
-        ax.set_ylim3d (-5,5)
-        ax.set_zlim3d (0.3,10000)
 	#ajout des termes
 	for simplex in range (len (matrice_connectivite)) :
                 div_elem = div_h_u (simplex)
@@ -42,19 +38,9 @@ def trace_stationnaire () :
 		div[matrice_connectivite[simplex][1]].append (div_elem[1])
 		div[matrice_connectivite[simplex][2]].append (div_elem[2])
 	#moyennage
-        for point in range(len (matrice_points)) :
-		div[point] = moy (div[point])
+        moy_par_point(div)
 	#affichage
-	for simplex in range (len (matrice_connectivite)) :
-                sommets = []
-                sommets.append ([matrice_points[matrice_connectivite[simplex][0]][0], matrice_points[matrice_connectivite[simplex][0]][1], div[matrice_connectivite[simplex][0]]])
-                sommets.append ([matrice_points[matrice_connectivite[simplex][1]][0], matrice_points[matrice_connectivite[simplex][1]][1], div[matrice_connectivite[simplex][1]]])
-                sommets.append ([matrice_points[matrice_connectivite[simplex][2]][0], matrice_points[matrice_connectivite[simplex][2]][1], div[matrice_connectivite[simplex][2]]])
-                tri = a3.art3d.Poly3DCollection ([sommets])
-                tri.set_color (matplotlib.colors.rgb2hex ([1., 0., 0.]))
-                tri.set_edgecolor ('k')
-                ax.add_collection3d (tri)
-        pl.show ()
+        trace_surface(div)
 
 ##
 # @brief évalue la véracité de la conservation de la masse
@@ -117,6 +103,24 @@ def distrib_reg_moments () :
         distrib_reg1D(x2,y2)
         print("x+y")
         distrib_reg1D(x1+x2,y1+y2)
+
+#####################partie graphique
+
+def trace_surface(profondeurPoints) :
+        ax=a3.Axes3D (pl.figure ())
+        ax.set_xlim3d (0,120)
+        ax.set_ylim3d (-5,5)
+        ax.set_zlim3d (0.3,10000)
+	for simplex in range(len(matrice_connectivite)) :
+                sommets = []
+                sommets.append( [x(simplex, 0), y(simplex, 0), profondeurPoints[ligne_point(simplex, 0)]])
+                sommets.append( [x(simplex, 1), y(simplex, 1), profondeurPoints[ligne_point(simplex, 1)]])
+                sommets.append( [x(simplex, 2), y(simplex, 2), profondeurPoints[ligne_point(simplex, 2)]])
+                tri = a3.art3d.Poly3DCollection ([sommets])
+                tri.set_color (matplotlib.colors.rgb2hex ([1., 0., 0.]))
+                tri.set_edgecolor ('k')
+                ax.add_collection3d (tri)
+        pl.show ()
 
 ################################################### Calculs des termes par simplex
 
@@ -275,11 +279,10 @@ def equa_moments() :
                         y2[ligne_point[point]].append(g * S0[point][1] + g_grad_h_elem[point][1] + vgv_elem[point][1])
                         x2[ligne_point[point]].append(-g * Sf[point][1])
 	#moyennage
-        for point in range(len(matrice_points)) :
-		x1[point]=moy(x1[point])
-		y1[point]=moy(y1[point])
-		x2[point]=moy(x2[point])
-		y2[point]=moy(y2[point])
+        moy_par_point(x1)
+        moy_par_point(y1)
+        moy_par_point(x2)
+        moy_par_point(y2)
 
         return [x1, y1, x2, y2]
 
