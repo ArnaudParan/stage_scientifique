@@ -41,5 +41,9 @@ class opVect_testCase(unittest.TestCase) :
 		testScal = 1
 		self.assertEqual(sommeScalVect(testScal, testVect), [1, 2, 3, 4, 5, 7, 8, 9, 10, 11])
 
+	def test_variance(self) :
+		testVect = [5, 5, 5, 5, 5, 5]
+		self.assertEqual(variance(testVect), 0)
+
 if __name__ == "__main__" :
 	unittest.main()

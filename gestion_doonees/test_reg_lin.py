@@ -16,7 +16,7 @@ class regLin_testCase(unittest.TestCase) :
 		z = sommeScalVect(a0, somme(a1x, a2y))
 		actualMexpected = somme([-a0, -a1, -a2], reg2D(x,y,z))
                 error = norminf(actualMexpected)
-		self.assertTrue(error <= 1., str(error))
+		self.assertTrue(error <= 1., "Error too great" + str(error))
 
 	def test_reg1D(self) :
                 a0 = 0.
@@ -25,7 +25,7 @@ class regLin_testCase(unittest.TestCase) :
 		z = sommeScalVect(a0, mult(a1, x))
 		actualMexpected = somme([-a0, -a1], reg1D(x,z))
                 error = norminf(actualMexpected)
-		self.assertTrue(error <= 1., str(error))
+		self.assertTrue(error <= 1., "Error too great" + str(error))
 
 if __name__ == "__main__" :
 	unittest.main()

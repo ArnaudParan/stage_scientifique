@@ -19,6 +19,8 @@ from donnees import *
 
 g = 9.81
 K = 30.
+Kx = 56.1567453112
+Ky = 31.3535063547
 
 
 ################################ Traitement des calculs et affichage des résultats
@@ -33,12 +35,15 @@ def trace_stationnaire () :
                 div.append ([])
 	#ajout des termes
 	for simplex in range (len (matrice_connectivite)) :
-                div_elem = div_h_u (simplex)
+                div_elem = div_h_u_normalise (simplex)
 		div[matrice_connectivite[simplex][0]].append (div_elem[0])
 		div[matrice_connectivite[simplex][1]].append (div_elem[1])
 		div[matrice_connectivite[simplex][2]].append (div_elem[2])
 	#moyennage
         moy_par_point(div)
+	print("moyenne :" + str(moy(div)))
+	print("variance :" + str(variance(div)))
+	print("norme infinie :" + str(norminf(div)))
 	#affichage
         trace_surface(div)
 
@@ -50,7 +55,7 @@ def trace_stationnaire () :
 def equa_masse () :
 	erreur = 0.
 	for i in range (len (matrice_connectivite)) :
-		erreur = max ([erreur, norminf (div_h_u (i))])
+		erreur = max ([erreur, norminf (div_h_u_normalise (i))])
 	return erreur
 
 def exe () :
@@ -59,12 +64,16 @@ def exe () :
         y1 = moments[1]
         x2 = moments[2]
         y2 = moments[3]
-        Mx = 0.
-        My = 0.
-        for point in range(len(x1)) :
-                Mx = max ([Mx] + [abs(x1[point] - (y1[point] / (K ** 2)))])
-                My = max ([My] + [abs(x2[point] - (y2[point] / (K ** 2)))])
-        return [Mx, My]
+	serieStatx = somme(x1,mult(1/Kx**2, y1))
+	serieStaty = somme(x2,mult(1/Ky**2, y2))
+	print("x")
+	print("norminf :" + str(norminf(serieStatx)))
+	print("moyenne :" + str(moy(serieStatx)))
+	print("variance :" + str(variance(serieStatx)))
+	print("y")
+	print("norminf :" + str(norminf(serieStaty)))
+	print("moyenne :" + str(moy(serieStaty)))
+	print("variance :" + str(variance(serieStaty)))
 
 def reg_moments () :
         moments = equa_moments()
@@ -134,20 +143,26 @@ def equa_moments() :
                 y1.append ([])
                 x2.append ([])
                 y2.append ([])
+	S0 = [[0,0], [0,0], [0,0]]
+	Sf = [[0,0], [0,0], [0,0]]
+	matiere = [[0,0], [0,0], [0,0]]
+	g_grad_h_elem = [[0,0], [0,0], [0,0]]
+	vgv_elem = [[0,0], [0,0], [0,0]]
 	#ajout des termes
 	for simplex in range (len (matrice_connectivite)) :
                 S0 = calcule_S0(simplex)
                 Sf = calcule_Sf(simplex)
+		matiere = termMomMatiere(simplex)
                 g_grad_h_elem = calc_g_grad_hi (simplex)
                 vgv_elem = calcule_v_grad_vi (simplex)
                 ligne_point = [matrice_connectivite[simplex][0],
                                 matrice_connectivite[simplex][1],
                                 matrice_connectivite[simplex][2]]
                 for point in range(3) :
-                        y1[ligne_point[point]].append(g * S0[point][0] + g_grad_h_elem[point][0] + vgv_elem[point][0])
+                        y1[ligne_point[point]].append(g * S0[point][0] + g_grad_h_elem[point][0] + vgv_elem[point][0] + matiere[point][0])
                         x1[ligne_point[point]].append(-g * Sf[point][0])
 
-                        y2[ligne_point[point]].append(g * S0[point][1] + g_grad_h_elem[point][1] + vgv_elem[point][1])
+                        y2[ligne_point[point]].append(g * S0[point][1] + g_grad_h_elem[point][1] + vgv_elem[point][1] + matiere[point][1])
                         x2[ligne_point[point]].append(-g * Sf[point][1])
 	#moyennage
         moy_par_point(x1)
@@ -185,8 +200,15 @@ def calcule_v_grad_v () :
 # @param matrice_connectivite la matrice de connectivité définie dans donneer.py
 # @param i l'indice du simplex considéré
 # @return les coordonnées de la divergence sur la base des fonctions forme
-def div_h_u (simplex) :
+def div_h_u_normalise (simplex) :
 	H = (h (simplex, 0) + h (simplex, 1) + h (simplex, 2)) / 3.
+	div = div_h_u(simplex)
+	for point in range(3) :
+		#on divise par pointa moyenne des h
+		div[point] *= 1. / H
+        return div;
+
+def div_h_u (simplex) :
 	#gradients
 	g = fforme_gradient (simplex)
 	#les coordonnées de la divergence dans la base des fonctions forme
@@ -198,9 +220,14 @@ def div_h_u (simplex) :
 			div[point] += h(simplex, k) * u(simplex, point) * g[k][0] + h(simplex, point) * u(simplex, k) * g[k][0]
 			#dérivée par rapport à y
 			div[point] += h(simplex, k) * v(simplex, point) * g[k][1] + h(simplex, point) * v(simplex, k) * g[k][1]
-			#on divise par pointa moyenne des h
-			div[point] *= 1. / H
         return div;
+
+def termMomMatiere(simplex) :
+	div_h_u_sim = div_h_u_normalise(simplex)
+	matiere = [mult(div_h_u_sim[0], [u(simplex, 0), v(simplex, 0)]),
+			mult(div_h_u_sim[1], [u(simplex, 1), v(simplex, 1)]),
+			mult(div_h_u_sim[2], [u(simplex, 2), v(simplex, 2)])]
+	return matiere
 
 def norm_vit(simplex, point) :
         return Math.sqrt((u(simplex, point) ** 2) + (v(simplex, point) ** 2))

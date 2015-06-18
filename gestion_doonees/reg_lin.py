@@ -47,10 +47,11 @@ def reg2D(x,y,z):
 	coeffs = res[0]
 	print('conv achieved : ' + str(res[1]))
 	err_quad=0.
+	moyZ = moy(z)
 	for i in range(len(x)):
 		err_quad+=(z[i]-coeffs[0]-coeffs[1]*x[i]-coeffs[2]*y[i])**2
 	err_quad=Math.sqrt(err_quad/len(x))
-	print('Erreur de la régression :'+str(err_quad))
+	print('Erreur relative de la régression :'+str(err_quad/abs(moyZ)))
 	return coeffs
 
 def reg1D(x,z):
@@ -71,10 +72,11 @@ def reg1D(x,z):
 	coeffs = res[0]
 	print('conv achieved : ' + str(res[1]))
 	err_quad=0.
+	moyZ = moy(z)
 	for i in range(len(x)):
 		err_quad+=(z[i]-coeffs[0]-coeffs[1]*x[i])**2
 	err_quad=Math.sqrt(err_quad/len(x))
-	print('Erreur de la régression :'+str(err_quad))
+	print('Erreur relative de la régression :'+str(err_quad/abs(moyZ)))
 	return coeffs
 
 def distrib_reg1D(x,z):

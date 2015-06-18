@@ -2,6 +2,7 @@
 #-*-coding:utf-8-*
 
 from donnees import *
+import math as Math
 
 ##
 # @brief crée la moyenne d'un tableau
@@ -66,3 +67,11 @@ def sommeScalVect(l,x):
 	for i in range(len(x)):
 		somme.append(x[i]+l)
 	return somme
+
+def variance(serieStat) :
+	moyenne = moy(serieStat)
+	distanceTot = 0.
+	for valExp in serieStat :
+		distanceTot += (valExp - moyenne)**2
+	variance = Math.sqrt(distanceTot/len(serieStat))
+	return variance
