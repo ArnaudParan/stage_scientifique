@@ -122,6 +122,61 @@ def trace_surface(profondeurPoints) :
                 ax.add_collection3d (tri)
         pl.show ()
 
+##################### Opérations générales sur tout le maillage
+
+def equa_moments() :
+        x1 = []
+        y1 = []
+        x2 = []
+        y2 = []
+        for point in range (len (matrice_points)) :
+                x1.append ([])
+                y1.append ([])
+                x2.append ([])
+                y2.append ([])
+	#ajout des termes
+	for simplex in range (len (matrice_connectivite)) :
+                S0 = calcule_S0(simplex)
+                Sf = calcule_Sf(simplex)
+                g_grad_h_elem = calc_g_grad_hi (simplex)
+                vgv_elem = calcule_v_grad_vi (simplex)
+                ligne_point = [matrice_connectivite[simplex][0],
+                                matrice_connectivite[simplex][1],
+                                matrice_connectivite[simplex][2]]
+                for point in range(3) :
+                        y1[ligne_point[point]].append(g * S0[point][0] + g_grad_h_elem[point][0] + vgv_elem[point][0])
+                        x1[ligne_point[point]].append(-g * Sf[point][0])
+
+                        y2[ligne_point[point]].append(g * S0[point][1] + g_grad_h_elem[point][1] + vgv_elem[point][1])
+                        x2[ligne_point[point]].append(-g * Sf[point][1])
+	#moyennage
+        moy_par_point(x1)
+        moy_par_point(y1)
+        moy_par_point(x2)
+        moy_par_point(y2)
+
+        return [x1, y1, x2, y2]
+
+def calc_g_grad_h() :
+        g_grad_h = []
+        for simplex in range (len (matrice_connectivite)) :
+                g_grad_h.append (calc_g_grad_hi (simplex))
+        returng_grad_h 
+
+def calcule_h_v_grad_v () :
+        hvgv = calcule_v_grad_v ()
+        for simplex in range (len (matrice_connectivite)) :
+                hvgv[simplex][0] *= matrice_points [matrice_connectivite[simplex][0]] [4]
+                hvgv[simplex][1] *= matrice_points [matrice_connectivite[simplex][1]] [4]
+                hvgv[simplex][2] *= matrice_points [matrice_connectivite[simplex][2]] [4]
+        return hvgv
+
+def calcule_v_grad_v () :
+        v_grad_v = []
+        for simplex in range (len (matrice_connectivite)) :
+                v_grad_v.append (calcule_v_grad_vi (simplex))
+        return v_grad_v
+
 ################################################### Calculs des termes par simplex
 
 ##
@@ -230,61 +285,6 @@ def calcule_h_v_grad_vi(simplex) :
         hvgv[1] *= h (simplex, 1)
         hvgv[2] *= h (simplex, 2)
         return hvgv
-
-##################### Opérations générales sur tout le maillage
-
-def calc_g_grad_h() :
-        g_grad_h = []
-        for simplex in range (len (matrice_connectivite)) :
-                g_grad_h.append (calc_g_grad_hi (simplex))
-        returng_grad_h 
-
-def calcule_v_grad_v () :
-        v_grad_v = []
-        for simplex in range (len (matrice_connectivite)) :
-                v_grad_v.append (calcule_v_grad_vi (simplex))
-        return v_grad_v
-
-def calcule_h_v_grad_v () :
-        hvgv = calcule_v_grad_v ()
-        for simplex in range (len (matrice_connectivite)) :
-                hvgv[simplex][0] *= matrice_points [matrice_connectivite[simplex][0]] [4]
-                hvgv[simplex][1] *= matrice_points [matrice_connectivite[simplex][1]] [4]
-                hvgv[simplex][2] *= matrice_points [matrice_connectivite[simplex][2]] [4]
-        return hvgv
-
-def equa_moments() :
-        x1 = []
-        y1 = []
-        x2 = []
-        y2 = []
-        for point in range (len (matrice_points)) :
-                x1.append ([])
-                y1.append ([])
-                x2.append ([])
-                y2.append ([])
-	#ajout des termes
-	for simplex in range (len (matrice_connectivite)) :
-                S0 = calcule_S0(simplex)
-                Sf = calcule_Sf(simplex)
-                g_grad_h_elem = calc_g_grad_hi (simplex)
-                vgv_elem = calcule_v_grad_vi (simplex)
-                ligne_point = [matrice_connectivite[simplex][0],
-                                matrice_connectivite[simplex][1],
-                                matrice_connectivite[simplex][2]]
-                for point in range(3) :
-                        y1[ligne_point[point]].append(g * S0[point][0] + g_grad_h_elem[point][0] + vgv_elem[point][0])
-                        x1[ligne_point[point]].append(-g * Sf[point][0])
-
-                        y2[ligne_point[point]].append(g * S0[point][1] + g_grad_h_elem[point][1] + vgv_elem[point][1])
-                        x2[ligne_point[point]].append(-g * Sf[point][1])
-	#moyennage
-        moy_par_point(x1)
-        moy_par_point(y1)
-        moy_par_point(x2)
-        moy_par_point(y2)
-
-        return [x1, y1, x2, y2]
 
 ########################## Opérations pour les fonctions forme
 

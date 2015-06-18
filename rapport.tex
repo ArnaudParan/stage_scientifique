@@ -102,10 +102,15 @@
   
   Ce canal suit les équations de Saint Venant, c'est à dire:
   \begin{equation}
-    \frac{\partial \underline u}{\partial t}+\bdiv(h\underline u)
+    \frac {\partial \underline u} {\partial t}
+    +\bdiv(h \underline u)
   \end{equation}
   \begin{equation}
-    \frac{\partial h\underline u}{\partial t}+\bdiv(h\underline u \otimes \underline u)+\nabla(\frac 1 2 gh^2)+gh(\underline S_0 + \underline S_f)=0
+    \frac{\partial h\underline u}{\partial t}
+    + \bdiv(h \underline u \otimes \underline u)
+    + \nabla(\frac 1 2 g h^2)
+    + g h (\underline S_0 + \underline S_f)
+    = 0
   \end{equation}
   
   Ici, $\underline S_0$ est la pente du lit de la rivière et $\underline S_f$ le frottement.
@@ -114,10 +119,11 @@
    \underline S_0 = \bdiv z
   \end{equation}
   \begin{equation}
-    \underline S_{fx}=\frac{u^2+v^2}{K^2h^{\frac 4 3}}u
+    \underline S_{fx} =
+    \frac {u^2 + v^2} {K^2 h^{\frac 4 3}} u
   \end{equation}
   \begin{equation}
-    \underline S_{fy}=\frac{u^2+v^2}{K^2h^{\frac 4 3}}v
+    \underline S_{fy} = \frac {u^2 + v^2} {K^2 h^{\frac 4 3}} v
   \end{equation}
   \section{Vérification de la stationnarité}
   Nous avons tenté de vérifier que les résultats issus de Télémac vérifiaient les équations de Saint Venant.
@@ -125,13 +131,19 @@
   formes sur chaque simplex avec de formules simples obtenues géométriquement en considérant la hauteur du simplex.
   Les indices représentent le point du simplex
   \begin{equation}
-    g_1=\frac{(y_3-y_2) \underline e_x + (x_2-x_3) \underline e_y}{(x_2-x_3)*(y_1-y_3)-(x_1-x_3)*(y_2-y_3)}
+    g_1 =
+    \frac{(y_3 - y_2) \underline e_x + (x_2 - x_3) \underline e_y}
+    {(x_2 - x_3) * (y_1 - y_3) - (x_1 - x_3) * (y_2 - y_3)}
   \end{equation}
   \begin{equation}
-    g_2=\frac{(y_3-y_1) \underline e_x + (x_1-x_3) \underline e_y}{(x_1-x_3)*(y_2-y_3)-(x_2-x_3)*(y_1-y_3)}
+    g_2 =
+    \frac{(y_3 - y_1) \underline e_x + (x_1 - x_3) \underline e_y}
+    {(x_1 - x_3) * (y_2 - y_3) - (x_2 - x_3) * (y_1 - y_3)}
   \end{equation}
   \begin{equation}
-    g_3=\frac{(y_1-y_2) \underline e_x + (x_2-x_1) \underline e_y}{(x_2-x_1)*(y_3-y_1)-(x_3-x_1)*(y_2-y_1)}
+    g_3 =
+    \frac{(y_1 - y_2) \underline e_x + (x_2 - x_1) \underline e_y}
+    {(x_2 - x_1) * (y_3 - y_1) - (x_3 - x_1) * (y_2 - y_1)}
   \end{equation}
   
   Cela nous a permis donc de considérer la dérivation des grandeurs physiques du problème.
@@ -147,7 +159,9 @@
   Nous nous sommes alors attaqués à la première équation, la conservation de la matière.
   Elle s'est réécrite
   \begin{equation}
-    \underline u . \underline \nabla h + h\bdiv(\underline u) = 0
+    \underline u . \underline \nabla h 
+    +h\bdiv(\underline u) =
+    0
   \end{equation}
   Nous avons donc calculé les deux termes et les avons additionnés. Ensuite, nous les avons représentés graphiquement.
   
@@ -158,8 +172,57 @@
   Nous avons trouvé des valeurs de l'ordre de 1000, ce qui est loin du 0 auquel nous nous attendions, cependant, ce que l'on voulait
   c'était
   \begin{equation}
-    \underline u . \underline \nabla h + h\bdiv(\underline u) \leq \frac{\varepsilon}{\Delta t}
+    \underline u . \underline \nabla h 
+    +h\bdiv(\underline u) \leq
+    \frac{\varepsilon}{\Delta t}
   \end{equation}
-  Or, le $\Delta t$ pris pour l'expérimentation était de l'ordre de $10^{-3}$.
+  Or, le $\Delta t$ pris pour l'expérimentation était de l'ordre de $10^{-3}$. Ainsi, les valeurs trouvées gardent une cohérence
+  pour un $\varepsilon$ de l'ordre de $1$.
+  
+  Par la suite, nous nous sommes intéressés à l'équation des moments,
+  \begin{equation}
+    \frac{\partial h\underline u}{\partial t}
+    +\bdiv(h\underline u \otimes \underline u)
+    +\nabla(\frac 1 2 gh^2)
+    +gh(\underline S_0 + \underline S_f)=
+    0
+  \end{equation}
+  Nous l'avons simplifiée
+  \begin{equation}
+    \frac{\partial \underline u}{\partial t} =
+    \frac{\underline u}{h} \bdiv(h\underline u)
+    -\underline u.(\nabla \underline u)
+    -\underline u \bdiv(\underline u)
+    -\underline u(\underline u . \frac{\nabla h}{h})
+    -g \nabla h
+    -g(S_0 + S_f)
+  \end{equation}
+  Puis grace à l'équation précédente
+  \begin{equation}
+    \frac{\partial \underline u}{\partial t} =
+    -g \nabla h
+    -g(S_0 + S_f)
+  \end{equation}
+
+  
+  
+  
+  \section{Intro le pb}
+  \subsection{Exner St Venant quelle physique?}
+  Challenge modélisation des garres alternées avec Exner St Venant ou ?
+  Equation alternée autonome en z
+  \subsection{la méthode}
+  \subsubsection{utiliser les résultats préalables pour St Venant Exner stationnarité?}
+  \subsubsection{réduire le sys à une équation scalaire}
+  \section{etape 1 vérifier la stationnarité}
+  \section{etape 2 simuler 1 eq non linéaire de type chaleur}
+  \subsection{dédinition de la stationnarité d'une solution numérique, de T3D(P1)}
+  la masse
+  formules pour h, u, et les flux
+  équations h div u + u grad h
+  \subsubsection{définitions possibles de stationnarité, résultats numériques}
+  \subsection{les moments}
+  1 param à fixer, le Ks
+
   
 \end{document}

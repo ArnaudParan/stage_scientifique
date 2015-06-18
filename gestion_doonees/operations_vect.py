@@ -11,11 +11,11 @@ def moy (tab) :
 	taille_tab = len (tab)
 	moyenne = 0.
 	for elem in tab :
-		moyenne += elem / taille_tab
+		moyenne += float(elem) / float(taille_tab)
 	return moyenne
 
 def moy_par_point(vals_point_simplex) :
-        for point in range(len (matrice_points)) :
+        for point in range(len (vals_point_simplex)) :
 		vals_point_simplex[point] = moy(vals_point_simplex[point])
 
 ##	
@@ -41,6 +41,8 @@ def somme (vect1, vect2) :
 # @param x2 le deuxième vecteur
 # @param x3 le troisième vecteur
 # @return la somme
+
+#TODO retirer la désinformation
 def add (vect1 ,vect2 ,vect3) :
 	somme = []
 	#envoie une evectception si les vecteurs n'ont pas la meme taille
@@ -59,3 +61,8 @@ def norminf (x) :
 	inf = min (x)
 	return max ([abs (sup), abs (inf)])
 
+def sommeScalVect(l,x):
+	somme=[]
+	for i in range(len(x)):
+		somme.append(x[i]+l)
+	return somme
